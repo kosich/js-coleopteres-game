@@ -1,0 +1,6 @@
+*.sw*
+
+/bower_components/*
+!/bower_components/underscore/underscore.js
+!/bower_components/phaser-official/build/phaser.js
+/node_modules/*
