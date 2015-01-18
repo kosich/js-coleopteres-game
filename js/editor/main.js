@@ -69,7 +69,7 @@
 
         setCurrent( 0 );
 
-        world.cs = e.add.sprite( 'Selector.png' );
+        world.init();
 
         document.addEventListener('keydown', function(e) {
             var allowedKeys = {
@@ -163,7 +163,21 @@
     var world = (function(){
 
         var w = {};
+
         w.cc = { x : 0, y : 0 };
+
+        w.init = function world_init(){
+            w.g = e.add.group();
+
+            var cursorGroup = e.add.group();
+            w.cs = cursorGroup.create( 0, 0, 'Selector.png' );
+            w.cs.anchor.set( .18, .24 );
+
+            w.g.x += CELL_H;
+            cursorGroup.x += CELL_W;
+
+            w.add( items[ 0 ] );
+        };
 
         w.moveCursor = function world_moveCursor( d ){
             w.cc.x += d[ 0 ];
@@ -171,11 +185,13 @@
 
             w.cs.x = w.cc.x * CELL_W;
             w.cs.y = w.cc.y * CELL_H;
+
+            console.log( w.cc );
         };
 
         w.add = function world_add( item ){
-            console.log( ' adding item ', item );
-            e.add.sprite( w.cs.x, w.cs.y, item.img );
+            console.log( 'adding to ', item );
+            w.g.create( w.cc.x * CELL_W, w.cc.y * CELL_H, item.img );
         };
 
         w.remove = function world_remove(){
