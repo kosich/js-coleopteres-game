@@ -37,9 +37,11 @@
     }
 
     var world,
-    player,
-    playerSprite,
-    cursors;
+        player,
+        playerSprite,
+        cursors,
+        floorGroup,
+        itemsGroup;
 
     var coor = {
         x : function getX( c ){
@@ -51,7 +53,7 @@
     };
 
     function add ( item ){
-        var sprite = game.add.sprite( coor.x( item.cell ), coor.y( item.cell ), item.sprite );
+        var sprite = itemsGroup.create( coor.x( item.cell ), coor.y( item.cell ), item.sprite );
         sprite.anchor.setTo(0, .2);
         item._sprite = sprite;
 
@@ -66,15 +68,18 @@
         player = world.player;
 
         game.stage.backgroundColor = '#333';
+        floorGroup = game.add.group();
+        itemsGroup = game.add.group();
 
         world.field.forEach( function( row, y ){
             row.forEach( function( cell, x ){
                 if ( !cell )
                     return;
 
-                game.add.sprite(coor.x( cell ), coor.y( cell ), cell.sprite );
-            } )
+                floorGroup.create(coor.x( cell ), coor.y( cell ), cell.sprite );
+            } );
         } );
+        floorGroup.sort('y', Phaser.Group.SORT_ASCENDING);
 
         world.field.forEach( function( row, y ){
             row.forEach( function( cell, x ){
@@ -86,12 +91,12 @@
                         return;
 
                     var y = coor.y( cell ) - CELL_H/2;
-                    var s = game.add.sprite(coor.x( cell ), y, item.sprite );
+                    var s = itemsGroup.create( coor.x( cell ), y, item.sprite );
                     game.add.tween( s )
-                    .to( { y: y + 5 }, Math.floor(Math.random() * 1000 + 1000), Phaser.Easing.Quadratic.InOut )
-                    .to( { y: y } , Math.floor(Math.random() * 1000 + 1000), Phaser.Easing.Quadratic.InOut )
-                    .loop()
-                    .start();
+                        .to( { y: y + 5 }, Math.floor(Math.random() * 1000 + 1000), Phaser.Easing.Quadratic.InOut )
+                        .to( { y: y } , Math.floor(Math.random() * 1000 + 1000), Phaser.Easing.Quadratic.InOut )
+                        .loop()
+                        .start();
 
                 } );
             } );
@@ -113,12 +118,13 @@
         document.addEventListener('keydown', function(e) {
             var allowedKeys = {
                 37: 'left',
-                72: 'left',
                 38: 'up',
-                75: 'up',
                 39: 'right',
-                76: 'right',
                 40: 'down',
+
+                72: 'left',
+                75: 'up',
+                76: 'right',
                 74: 'down'
             };
 
@@ -133,6 +139,8 @@
 
         world.enemies.forEach( updateMovable );
         updateMovable( player );
+
+        itemsGroup.sort('y', Phaser.Group.SORT_ASCENDING);
     }
 
     function updateMovable ( item ){

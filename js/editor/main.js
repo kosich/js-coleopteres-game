@@ -30,6 +30,7 @@
     ];
 
     var items = [],
+        floorGroup,
         itemGroup;
 
     var e = new Phaser.Game(1200, 900, Phaser.AUTO, 'gamepane', {
@@ -48,6 +49,7 @@
 
     function create(){
         e.stage.backgroundColor = '#333';
+        floorGroup = e.add.group();
         itemGroup = e.add.group();
 
         var item;
@@ -67,9 +69,14 @@
         itemGroup.y += ITEM_H / 2;
         itemGroup.x += ITEM_W / 2;
 
+        floorGroup.x += ITEM_W;
+
         setCurrent( 0 );
 
         world.init();
+        e.camera.follow(world.cs);
+
+        e.world.setBounds(-400, -400,  400,  400);
 
         document.addEventListener('keydown', function(e) {
             var allowedKeys = {
@@ -157,21 +164,25 @@
     }
 
     function update(){
-
+        floorGroup.sort('y', Phaser.Group.SORT_ASCENDING);
     }
 
     var world = (function(){
 
         var w = {};
 
-        w.cc = { x : 0, y : 0 };
+        var cc = w.cc = { x : 0, y : 0 };
+        var f  = w.field = [[]];
+        f.width = 0;
+        f.height = 0;
 
         w.init = function world_init(){
             w.g = e.add.group();
 
             var cursorGroup = e.add.group();
             w.cs = cursorGroup.create( 0, 0, 'Selector.png' );
-            w.cs.anchor.set( .18, .24 );
+            // w.cs.anchor.set( .18, .24 );
+            w.cs.anchor.set( 0, .24 );
 
             w.g.x += CELL_H;
             cursorGroup.x += CELL_W;
@@ -190,13 +201,37 @@
         };
 
         w.add = function world_add( item ){
-            console.log( 'adding to ', item );
-            w.g.create( w.cc.x * CELL_W, w.cc.y * CELL_H, item.img );
+            // console.log( 'adding to ', item );
+            expand();
+            console.log( f );
+
+            floorGroup.create( w.cc.x * CELL_W, w.cc.y * CELL_H, item.img );
         };
 
         w.remove = function world_remove(){
             
         };
+
+
+        function expand(){
+            // add columns
+            while ( cc.x >= f[0].length ){
+                f.forEach(function( row, x ){
+                    row.push( new Cell(x, f.length -1, { type: 0 } ) );
+                });
+            }
+            f.width = f[0].length;
+
+            // add rows
+            while ( cc.y >= f.length ){
+                var row = [];
+                for( var x = 0; x < f.width; x++ ){
+                    row.push( new Cell(x, f.length -1, { type: 0 } ) );
+                }
+                f.push(row);
+            }
+            f.height = f.length;
+        }
 
         return w;
     })();
