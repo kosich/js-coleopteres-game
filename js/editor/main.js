@@ -9,7 +9,7 @@
 
     var currentItem = 0;
 
-    var components = [
+    var imgs = [
         'Stone Block.png',
         'Water Block.png',
         'Grass Block.png',
