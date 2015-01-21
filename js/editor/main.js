@@ -1,4 +1,4 @@
-(function(){
+(function( global ){
 
     var LEVEL_HEIGHT = 37, // height of a normal block
         CELL_W = 101,
@@ -9,7 +9,7 @@
 
     var currentItem = 0;
 
-    var imgs = [
+    var components = [
         'Stone Block.png',
         'Water Block.png',
         'Grass Block.png',
@@ -74,9 +74,9 @@
         setCurrent( 0 );
 
         world.init();
+        e.world.setBounds(0, 0, 1920, 1920);
         e.camera.follow(world.cs);
 
-        e.world.setBounds(-400, -400,  400,  400);
 
         document.addEventListener('keydown', function(e) {
             var allowedKeys = {
@@ -167,11 +167,16 @@
         floorGroup.sort('y', Phaser.Group.SORT_ASCENDING);
     }
 
-    var world = (function(){
+    var world = global.world = (function(){
 
-        var w = {};
+        var w = {
+            get currentCell (){
+                return this.field[this.currentCursor.y][this.currentCursor.x];
+            }
+        };
 
-        var cc = w.cc = { x : 0, y : 0 };
+        var cc = w.currentCursor = { x : 0, y : 0 };
+        var cells = [];
         var f  = w.field = [[]];
         f.width = 0;
         f.height = 0;
@@ -188,36 +193,42 @@
             cursorGroup.x += CELL_W;
 
             w.add( items[ 0 ] );
+            w.moveCursor( [ -1, -1 ] );
+            w.add( items[ 1 ] );
         };
 
         w.moveCursor = function world_moveCursor( d ){
-            w.cc.x += d[ 0 ];
-            w.cc.y += d[ 1 ];
+            cc.x += d[ 0 ];
+            cc.y += d[ 1 ];
 
-            w.cs.x = w.cc.x * CELL_W;
-            w.cs.y = w.cc.y * CELL_H;
+            w.cs.x = cc.x * CELL_W;
+            w.cs.y = cc.y * CELL_H;
 
-            console.log( w.cc );
+            console.log( cc );
         };
 
         w.add = function world_add( item ){
-            // console.log( 'adding to ', item );
+            // expand the field to contain the item
             expand();
-            console.log( f );
 
-            floorGroup.create( w.cc.x * CELL_W, w.cc.y * CELL_H, item.img );
+            // assign new item to the cell
+            var sprite = floorGroup.create( cc.x * CELL_W, cc.y * CELL_H, item.img );
+            w.currentCell.setSprite( sprite );
         };
 
         w.remove = function world_remove(){
-            
+            w.currentCell.remove();
+            // TODO: recalc field length/height if this cell was last nonemty in row/col
         };
 
 
         function expand(){
             // add columns
             while ( cc.x >= f[0].length ){
-                f.forEach(function( row, x ){
-                    row.push( new Cell(x, f.length -1, { type: 0 } ) );
+                f.forEach(function( row ){
+                    var cell = new Cell();
+                    cells.push( cell );
+                    row.push( cell );
                 });
             }
             f.width = f[0].length;
@@ -226,15 +237,64 @@
             while ( cc.y >= f.length ){
                 var row = [];
                 for( var x = 0; x < f.width; x++ ){
-                    row.push( new Cell(x, f.length -1, { type: 0 } ) );
+                    var cell = new Cell();
+                    cells.push( cell );
+                    row.push( cell );
                 }
                 f.push(row);
             }
             f.height = f.length;
+
+            if ( cc.x < 0 ){
+                var mx = 0;
+
+                while( mx-- > cc.x ){
+                    f.forEach(function( row ){
+                        var cell = new Cell();
+                        cells.push( cell );
+                        row.unshift( cell );
+                    });
+                }
+
+                cells.forEach( function( cell ){
+                    if ( !cell.sprite )
+                        return;
+                    cell.sprite.x -= cc.x*CELL_W;
+                });
+                w.cs.x -= cc.x*CELL_W;
+
+                cc.x = 0;
+                f.width = f[0].length;
+            }
+
+            if ( cc.y < 0 ){
+                var my = 0;
+                while( my-- > cc.y ){
+                    var row = [];
+                    for( var x = 0; x<f.width; x++ ){
+                        var cell = new Cell();
+                        cells.push( cell );
+                        row.push( cell );
+                    }
+                    f.unshift(row);
+                }
+
+                cells.forEach( function( cell ){
+                    if ( !cell.sprite )
+                        return;
+                    cell.sprite.y -= cc.y*CELL_H;
+                });
+                w.cs.y -= cc.y*CELL_H;
+
+                cc.y = 0;
+                f.height = f.length;
+            }
+
+            console.log( 'expanded', f.width, f.height, cells );
         }
 
         return w;
     })();
 
 
-})();
+})( this );
