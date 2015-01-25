@@ -1,33 +1,61 @@
 (function( global ){
+    'use strict';
 
-    var LEVEL_HEIGHT = 37, // height of a normal block
-        CELL_W = 101,
-        CELL_H = 83,
+    // Q: How world data would be stored?
+    // A: Its a map {
+    //   heroSpawnPos : 1,1
+    //   Area : [ [ 
+    //          Cell 
+    //   ] ]
+    // }
+    //
+    // Editor has it's own world
 
-        ITEM_H = CELL_H * 1.5;
-        ITEM_W = CELL_W;
 
     var currentItem = 0;
+    var world = global.world;
 
-    var imgs = [
-        'Stone Block.png',
-        'Water Block.png',
-        'Grass Block.png',
+    var Tools = {
+        Blocks:[
+            Block.Stone,
+            Block.Water,
+            Block.Grass
+        ],
+        Objects: [
+            // tree,
+            // bush,
+            // rock
+        ],
+        Player: undefined,
+        Enemy: undefined
+    };
 
-        'Key.png',
+        // items
+        //     key
+        //     tellyport
 
-        'Gem Blue.png',
-        'Gem Green.png',
-        'Gem Orange.png',
+        // objects
+        //     tree
+        //     bush
+        //     rock
 
-        'Tree Short.png',
-        'Tree Tall.png',
-        'Tree Ugly.png',
-        'Rock.png',
+        // player
+        // enemy
 
-        'Enemy Bug.png',
-        'Character Boy.png'
-    ];
+        // 'Key.png',
+
+        // 'Gem Blue.png',
+        // 'Gem Green.png',
+        // 'Gem Orange.png',
+
+        // 'Tree Short.png',
+        // 'Tree Tall.png',
+        // 'Tree Ugly.png',
+        // 'Rock.png',
+
+        // 'Enemy Bug.png',
+        // 'Character Boy.png'
+
 
     var items = [],
         floorGroup,
@@ -40,28 +68,33 @@
     });
 
     function preload(){
-        imgs.forEach( function ( img ){
-            e.load.image(img, 'assets/img/' + img);
-        } );
+        // Preload all imgs for the tools
+        // moveout to some global function
+        Tools.Blocks.forEach( function ( Tool ){
+            console.log( 'loading img', Tool.prototype.img );
+            e.load.image(Tool.prototype.img, 'assets/img/' + Tool.prototype.img);
+        });
 
+        // set as reusable either
         e.load.image('Selector.png', 'assets/img/' + 'Selector.png');
     }
 
     function create(){
+        // create toolbox
+        // create world/area
+        // adjust view
+        // set controls
+
         e.stage.backgroundColor = '#333';
         floorGroup = e.add.group();
         itemGroup = e.add.group();
 
         var item;
-        imgs.forEach( function( img, i ){
-            item = {
-               sprite : itemGroup.create( 0, i * ITEM_H, img ),
-               img : img
-            };
-
+        Tools.Blocks.forEach( function( Block, i ){
+            item = new Block();
+            item.sprite = itemGroup.create( 0, i * ITEM_H, item.img );
             item.sprite.alpha = 0.5;
             item.sprite.anchor.set( .5, .5 );
-
             items.push( item );
         } );
 
@@ -73,11 +106,11 @@
 
         setCurrent( 0 );
 
-        world.init();
+        world.init( e );
         e.world.setBounds(0, 0, 1920, 1920);
-        e.camera.follow(world.cs);
+        e.camera.follow(world.cursor.sprite);
 
-
+        // TODO: refactor to proper
         document.addEventListener('keydown', function(e) {
             var allowedKeys = {
                 38: 'up',
@@ -101,6 +134,7 @@
         });
     }
 
+    // TODO: move to toolbox.js
     var scaleFactor = 1.1;
     function setCurrent ( id ){
         if ( id < 0 )
@@ -148,12 +182,12 @@
 
     function handleInput( dir ){
         var keys = {
-            'up'     : function(){ world.moveCursor( [ 0, -1 ] ) },
-            'right'  : function(){ world.moveCursor( [ 1, 0 ] ) },
-            'down'   : function(){ world.moveCursor( [ 0, 1 ] ) },
-            'left'   : function(){ world.moveCursor( [ -1, 0 ] ) },
+            'up'     : function(){ world.cursor.move(  0, -1 ) },
+            'right'  : function(){ world.cursor.move(  1,  0 ) },
+            'down'   : function(){ world.cursor.move(  0,  1 ) },
+            'left'   : function(){ world.cursor.move( -1,  0 ) },
 
-            't-up'   : function(){  setCurrent ( currentItem - 1 ); },
+            't-up'   : function(){ setCurrent ( currentItem - 1 ); },
             't-down' : function(){ setCurrent ( currentItem + 1 ); },
 
             'select' : function(){ world.add( items[ currentItem ] ); },
@@ -164,137 +198,11 @@
     }
 
     function update(){
+        // actually got nothing to do,
+        // except sorting via Z and Y axis
         floorGroup.sort('y', Phaser.Group.SORT_ASCENDING);
     }
 
-    var world = global.world = (function(){
-
-        var w = {
-            get currentCell (){
-                return this.field[this.currentCursor.y][this.currentCursor.x];
-            }
-        };
-
-        var cc = w.currentCursor = { x : 0, y : 0 };
-        var cells = [];
-        var f  = w.field = [[]];
-        f.width = 0;
-        f.height = 0;
-
-        w.init = function world_init(){
-            w.g = e.add.group();
-
-            var cursorGroup = e.add.group();
-            w.cs = cursorGroup.create( 0, 0, 'Selector.png' );
-            // w.cs.anchor.set( .18, .24 );
-            w.cs.anchor.set( 0, .24 );
-
-            w.g.x += CELL_H;
-            cursorGroup.x += CELL_W;
-
-            w.add( items[ 0 ] );
-            w.moveCursor( [ -1, -1 ] );
-            w.add( items[ 1 ] );
-        };
-
-        w.moveCursor = function world_moveCursor( d ){
-            cc.x += d[ 0 ];
-            cc.y += d[ 1 ];
-
-            w.cs.x = cc.x * CELL_W;
-            w.cs.y = cc.y * CELL_H;
-
-            console.log( cc );
-        };
-
-        w.add = function world_add( item ){
-            // expand the field to contain the item
-            expand();
-
-            // assign new item to the cell
-            var sprite = floorGroup.create( cc.x * CELL_W, cc.y * CELL_H, item.img );
-            w.currentCell.setSprite( sprite );
-        };
-
-        w.remove = function world_remove(){
-            w.currentCell.remove();
-            // TODO: recalc field length/height if this cell was last nonemty in row/col
-        };
-
-
-        function expand(){
-            // add columns
-            while ( cc.x >= f[0].length ){
-                f.forEach(function( row ){
-                    var cell = new Cell();
-                    cells.push( cell );
-                    row.push( cell );
-                });
-            }
-            f.width = f[0].length;
-
-            // add rows
-            while ( cc.y >= f.length ){
-                var row = [];
-                for( var x = 0; x < f.width; x++ ){
-                    var cell = new Cell();
-                    cells.push( cell );
-                    row.push( cell );
-                }
-                f.push(row);
-            }
-            f.height = f.length;
-
-            if ( cc.x < 0 ){
-                var mx = 0;
-
-                while( mx-- > cc.x ){
-                    f.forEach(function( row ){
-                        var cell = new Cell();
-                        cells.push( cell );
-                        row.unshift( cell );
-                    });
-                }
-
-                cells.forEach( function( cell ){
-                    if ( !cell.sprite )
-                        return;
-                    cell.sprite.x -= cc.x*CELL_W;
-                });
-                w.cs.x -= cc.x*CELL_W;
-
-                cc.x = 0;
-                f.width = f[0].length;
-            }
-
-            if ( cc.y < 0 ){
-                var my = 0;
-                while( my-- > cc.y ){
-                    var row = [];
-                    for( var x = 0; x<f.width; x++ ){
-                        var cell = new Cell();
-                        cells.push( cell );
-                        row.push( cell );
-                    }
-                    f.unshift(row);
-                }
-
-                cells.forEach( function( cell ){
-                    if ( !cell.sprite )
-                        return;
-                    cell.sprite.y -= cc.y*CELL_H;
-                });
-                w.cs.y -= cc.y*CELL_H;
-
-                cc.y = 0;
-                f.height = f.length;
-            }
-
-            console.log( 'expanded', f.width, f.height, cells );
-        }
-
-        return w;
-    })();
 
 
 })( this );

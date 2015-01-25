@@ -1,20 +1,24 @@
 (function( global ){
     'use strict';
 
-    function Cell (){
-
+    function Cell ( x, y, renderGroup ){
+        this.x = x;
+        this.y = y;
+        this.renderGroup = fieldrenderGroup;
     }
 
     _.extend( Cell.prototype, {
-        sprite : undefined,
-        setSprite : function setSprite( sprite ){
-            if ( this.sprite ){
-                this.sprite.destroy();
-            }
-            this.sprite = sprite;
+        add : function add ( Item ){
+            if ( this.block )
+                throw 'cell already has a block';
+
+            this.block = new Item();
+            block.sprite = this.renderGroup.create( x * CELL_W, y * CELL_H, this.block.img );
+
         },
         remove : function remove(){
-            this.setSprite(  );
+            this.block.sprite.destroy();
+            this.block = undefined;
         }
     } );
 
