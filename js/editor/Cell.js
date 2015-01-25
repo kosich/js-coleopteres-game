@@ -4,7 +4,7 @@
     function Cell ( x, y, renderGroup ){
         this.x = x;
         this.y = y;
-        this.renderGroup = fieldrenderGroup;
+        this.renderGroup = renderGroup;
     }
 
     _.extend( Cell.prototype, {
@@ -13,7 +13,7 @@
                 throw 'cell already has a block';
 
             this.block = new Item();
-            block.sprite = this.renderGroup.create( x * CELL_W, y * CELL_H, this.block.img );
+            this.block.sprite = this.renderGroup.create( this.x * CELL_W, this.y * CELL_H, this.block.img );
 
         },
         remove : function remove(){

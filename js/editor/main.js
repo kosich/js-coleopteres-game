@@ -190,7 +190,7 @@
             't-up'   : function(){ setCurrent ( currentItem - 1 ); },
             't-down' : function(){ setCurrent ( currentItem + 1 ); },
 
-            'select' : function(){ world.add( items[ currentItem ] ); },
+            'select' : function(){ world.add( items[ currentItem ].constructor ); },
             'remove' : function(){ world.remove(); }
         };
 
@@ -200,7 +200,7 @@
     function update(){
         // actually got nothing to do,
         // except sorting via Z and Y axis
-        floorGroup.sort('y', Phaser.Group.SORT_ASCENDING);
+        world.update();
     }
 
 
