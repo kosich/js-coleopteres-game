@@ -27,6 +27,20 @@
         Enemy: undefined
     };
 
+
+    var helperImages = [
+        'Selector.png',
+        'Shadow East.png',
+        'Shadow West.png',
+        'Shadow North.png',
+        'Shadow South.png',
+        'Shadow Side West.png',
+        'Shadow North East.png',
+        'Shadow North West.png',
+        'Shadow South East.png',
+        'Shadow South West.png'
+    ];
+
         // items
         //     key
         //     tellyport
@@ -77,7 +91,10 @@
         }
 
         // set as reusable either
-        e.load.image('Selector.png', 'assets/img/' + 'Selector.png');
+        helperImages.forEach( function( img ){
+            e.load.image( img, 'assets/img/' + img);
+        } );
+
     }
 
     function create(){
@@ -96,17 +113,17 @@
         } )
         .forEach( function( Block, i ){
             item = new Block();
-            item.sprite = toolBoxGroup.create( 0, i * ITEM_H, item.img );
+            item.sprite = toolBoxGroup.create( 0, i * CELL_Y * 1.5, item.img );
             item.sprite.alpha = 0.5;
             item.sprite.anchor.set( .5, .5 );
             items.push( item );
         } );
 
         toolBoxGroup.scale.set(.5, .5);
-        toolBoxGroup.y += ITEM_H / 2;
-        toolBoxGroup.x += ITEM_W / 2;
+        toolBoxGroup.y += CELL_Y / 2;
+        toolBoxGroup.x += CELL_Y / 2;
 
-        cellGroup.x += CELL_W;
+        cellGroup.x += CELL_X;
 
         // toolbox current
         setCurrent( 0 );
@@ -117,6 +134,8 @@
 
         e.world.setBounds(0, 0, 2000, 2000);
         e.camera.follow(cursor.sprite);
+
+        world.imp(JSON.parse('{"cells":[{"x":1,"y":2,"z":0},{"x":2,"y":2,"z":0},{"x":3,"y":2,"z":0},{"x":4,"y":2,"z":0},{"x":4,"y":3,"z":0},{"x":3,"y":3,"z":0},{"x":2,"y":3,"z":0},{"x":1,"y":3,"z":0},{"x":1,"y":4,"z":0},{"x":2,"y":4,"z":0},{"x":3,"y":4,"z":0},{"x":4,"y":4,"z":0},{"x":3,"y":5,"z":0},{"x":4,"y":5,"z":0},{"x":2,"y":5,"z":0},{"x":1,"y":5,"z":0},{"x":2,"y":4,"z":1},{"x":2,"y":3,"z":1},{"x":3,"y":3,"z":1},{"x":3,"y":4,"z":1},{"x":6,"y":4,"z":0},{"x":6,"y":3,"z":0},{"x":6,"y":2,"z":0},{"x":7,"y":2,"z":0},{"x":7,"y":3,"z":0},{"x":8,"y":3,"z":0},{"x":8,"y":2,"z":0},{"x":8,"y":4,"z":0},{"x":7,"y":4,"z":0},{"x":7,"y":3,"z":1},{"x":7,"y":4,"z":1},{"x":7,"y":5,"z":0},{"x":6,"y":5,"z":0},{"x":8,"y":5,"z":0},{"x":5,"y":5,"z":-1},{"x":5,"y":4,"z":-1},{"x":5,"y":3,"z":-1},{"x":5,"y":2,"z":-1},{"x":5,"y":3,"z":0},{"x":6,"y":3,"z":1}]}'));
 
         // TODO: refactor to proper
         document.addEventListener('keydown', function(e) {
@@ -168,12 +187,13 @@
                 .start();
         }
 
+        var tweenY = titem.sprite.y;
         
         if ( titem && !titem.tween ){
             titem.tween = e.add.tween( titem.sprite );
             titem.tween
-                .to( { y : id * ITEM_H + 3 }, 500 )
-                .to( { y : id * ITEM_H }, 500 )
+                .to( { y : tweenY + 3 }, 500 )
+                .to( { y : tweenY }, 500 )
                 .loop()
                 .start();
         }
