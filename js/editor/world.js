@@ -1,72 +1,110 @@
 var world = (function(){
     'use strict';
 
+    // public properties:
+    //
+    //
     // public methods:
     // --
     // init
     // --
-    // moveCursor( dx, dy )
     // add( Item )
     // remove(  )
-    // --
-    // -- possible
+    //
+    //
+    // <<POSSIBLE>>
+    // save
     // export
-    // moveCursorTo( x, y )
-    // list (  ) // enlist all items in current cell
 
 
     var world = {
         init : init,
-        cursor : undefined,
         update : update,
         add : add,
-        remove : remove
+        remove : remove,
+
+        exp : exp,
+        imp : imp
     };
 
-    var cursor,
-        cells,
-        group,
-        cursorGroup;
+    var cells,
+        group;
 
     // inits the world
     // creates area, positions selector
-    function init( editor ){
-        group = editor.add.group();
-        cursorGroup = editor.add.group();
-
-        cursor = this.cursor = new Cursor( cursorGroup.create( 0, 0, 'Selector.png' ) );
-
-        group.x += CELL_H;
-        cursorGroup.x += CELL_W;
-
+    function init( renderGroup ){
+        group = renderGroup;
+        group.x += CELL_W;
         cells = [];
     }
 
-    function update(  ){
-        group.sort('y', Phaser.Group.SORT_ASCENDING);
+    function imp ( exported ){
+        // reset all current settings
+        // & remove all current cells
+        cells.forEach( remove );
+
+        // import world properties
+
+        if ( exported.cells ){
+            cells = exported.cells.map( function( def ){
+                return (new Cell ( def.x, def.y, def.z, group ).add( Blocks.Grass ));
+            } );
+        }
+
     }
 
-    function add( Item ){
+    function exp (){
+        // export all world properies
+        // gravity or whatever
+        var exported = {};
+        exported.cells = cells.map( function( cell ){
+            return {
+                x : cell.x,
+                y : cell.y,
+                z : cell.z //,
+                // item : cell.item.exp()
+            };
+        } );
+
+        return exported;
+    }
+
+    function update(  ){
+        // properly sort the cells
+        group.customSort(function( a, b ){
+            return ( a._z - b._z ) || ( a.y - b.y );
+        });
+    }
+
+    function add( x, y, z, Item ){
         // expand the field to contain the item
-        var cell = getCurrentCell();
+        var cell = getCellAt( x, y, z );
         if ( !cell ){
-            cell = new Cell( cursor.x, cursor.y, group );
+            cell = new Cell( x, y, z, group );
             cells.push( cell );
         }
         // assign new item to the cell
         return cell.add( Item );
     }
 
-    function remove(){
-        var cell = getCurrentCell();
+    function remove( cell ){
+        if (!cell){
+            console.warn( 'nothing to remove' );
+            return;
+        }
+
         cell.remove();
         cells.splice( cells.indexOf( cell ), 1 );
     }
 
-    function getCurrentCell (){
+    function removeAt( x, y, z ){
+        remove ( getCellAt( x, y, z ) );
+    }
+
+    function getCellAt ( x, y, z ){
         return cells.find( function( cell ){
             // ? might use Point class with it's comparision
-            return cell.x === cursor.x && cell.y === cursor.y;
+            return cell.x === x && cell.y === y && cell.z === z;
         } );
     }
 

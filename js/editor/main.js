@@ -12,20 +12,17 @@
     // Editor has it's own world
 
 
-    var currentItem = 0;
-    var world = global.world;
+    var currentItem = 0,
+        world = global.world,
+        cursor;
 
     var Tools = {
-        Blocks:[
-            Block.Stone,
-            Block.Water,
-            Block.Grass
-        ],
-        Objects: [
-            // tree,
-            // bush,
-            // rock
-        ],
+        Blocks: Object.keys(Blocks).map( function( key ){
+            return Blocks[ key ];
+        } ),
+        Objects: Object.keys(Objects).map( function( key ){
+            return Objects[ key ];
+        } ),
         Player: undefined,
         Enemy: undefined
     };
@@ -58,22 +55,26 @@
 
 
     var items = [],
-        floorGroup,
-        itemGroup;
+        toolBoxGroup,
+        cellGroup;
 
     var e = new Phaser.Game(1200, 900, Phaser.AUTO, 'gamepane', {
         preload : preload,
-        create: create,
-        update: update
+        create  : create,
+        update  : update,
+        render  : render
     });
 
     function preload(){
         // Preload all imgs for the tools
         // moveout to some global function
-        Tools.Blocks.forEach( function ( Tool ){
-            console.log( 'loading img', Tool.prototype.img );
-            e.load.image(Tool.prototype.img, 'assets/img/' + Tool.prototype.img);
-        });
+        Tools.Blocks.forEach( loadTool );
+        Tools.Objects.forEach( loadTool );
+
+        function loadTool ( Tool ){
+            if ( Tool.prototype.img )
+                e.load.image(Tool.prototype.img, 'assets/img/' + Tool.prototype.img);
+        }
 
         // set as reusable either
         e.load.image('Selector.png', 'assets/img/' + 'Selector.png');
@@ -86,42 +87,53 @@
         // set controls
 
         e.stage.backgroundColor = '#333';
-        floorGroup = e.add.group();
-        itemGroup = e.add.group();
+        cellGroup = e.add.group();
+        toolBoxGroup = e.add.group();
 
         var item;
-        Tools.Blocks.forEach( function( Block, i ){
+        Tools.Blocks.concat( Tools.Objects ).filter( function( Tool ){
+            return !!Tool.prototype.img;
+        } )
+        .forEach( function( Block, i ){
             item = new Block();
-            item.sprite = itemGroup.create( 0, i * ITEM_H, item.img );
+            item.sprite = toolBoxGroup.create( 0, i * ITEM_H, item.img );
             item.sprite.alpha = 0.5;
             item.sprite.anchor.set( .5, .5 );
             items.push( item );
         } );
 
-        itemGroup.scale.set(.5, .5);
-        itemGroup.y += ITEM_H / 2;
-        itemGroup.x += ITEM_W / 2;
+        toolBoxGroup.scale.set(.5, .5);
+        toolBoxGroup.y += ITEM_H / 2;
+        toolBoxGroup.x += ITEM_W / 2;
 
-        floorGroup.x += ITEM_W;
+        cellGroup.x += CELL_W;
 
+        // toolbox current
         setCurrent( 0 );
 
-        world.init( e );
-        e.world.setBounds(0, 0, 1920, 1920);
-        e.camera.follow(world.cursor.sprite);
+        world.init( cellGroup );
+
+        cursor = new Cursor( cellGroup.create( 0, 0, 'Selector.png' ) );
+
+        e.world.setBounds(0, 0, 2000, 2000);
+        e.camera.follow(cursor.sprite);
 
         // TODO: refactor to proper
         document.addEventListener('keydown', function(e) {
             var allowedKeys = {
-                38: 'up',
-                39: 'right',
-                40: 'down',
-                37: 'left',
+                76: 'move:+x',
+                72: 'move:-x',
 
-                75: 't-up',
-                76: 't-right',
-                74: 't-down',
-                72: 't-left',
+                74: 'move:+y',
+                75: 'move:-y',
+
+                68: 'move:+z',  // D
+                70: 'move:-z',  // F
+
+                65: 't-up',     // A
+                83: 't-down',   // S
+                38: 't-up',     // UP ARROW
+                40: 't-down',   // DOWN ARROW
 
                 13: 'select',
                 46: 'remove'
@@ -180,27 +192,43 @@
         currentItem = id;
     }
 
+    var moveRegex = /move:([+-])([xyz])/;
     function handleInput( dir ){
-        var keys = {
-            'up'     : function(){ world.cursor.move(  0, -1 ) },
-            'right'  : function(){ world.cursor.move(  1,  0 ) },
-            'down'   : function(){ world.cursor.move(  0,  1 ) },
-            'left'   : function(){ world.cursor.move( -1,  0 ) },
+        if ( dir.indexOf('move:' ) === 0 ){
+            // movement key
+            var parsed = moveRegex.exec( dir ),
+                moveModificator = [ 0, 0, 0 ];
 
-            't-up'   : function(){ setCurrent ( currentItem - 1 ); },
-            't-down' : function(){ setCurrent ( currentItem + 1 ); },
+            // ok, this needs explanation:
+            // xyz charCodes are 120 121 122, so I set
+            // only needed axis on moveModificator
+            // eg.: `+` `x` =>
+            // mM[ 120 - 120 ] = 1
+            moveModificator[ parsed[ 2 ].charCodeAt(0) - 120 ] = parsed[ 1 ] === '+' ? 1 : -1;
 
-            'select' : function(){ world.add( items[ currentItem ].constructor ); },
-            'remove' : function(){ world.remove(); }
-        };
+            // now just apply our modificator array to cursor move, to match dx, dy, dz arguments
+            cursor.move.apply( cursor, moveModificator );
+        }
+        else {
+            ({
+                't-up'   : function(){ setCurrent ( currentItem - 1 ); },
+                't-down' : function(){ setCurrent ( currentItem + 1 ); },
 
-        keys[ dir ]();
+                'select' : function(){ world.add( cursor.x, cursor.y, cursor.z, items[ currentItem ].constructor ); },
+                'remove' : function(){ world.removeAt(cursor.x, cursor.y, cursor.z); }
+            })[ dir ]();
+        }
     }
 
     function update(){
         // actually got nothing to do,
         // except sorting via Z and Y axis
         world.update();
+    }
+
+    function render(){
+        // editor.debug.text("Click to toggle! Sorting enabled: " + sorted, 2, 36, "#ffffff");
+        e.debug.text(cursor.z, 2, 14, "#a7aebe");
     }
 
 

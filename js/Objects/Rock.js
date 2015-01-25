@@ -1,11 +1,8 @@
 (function( global ){
     'use strict';
 
-    function Rock (  ){ }
-    Rock.prototype.sprite = 'Rock.png';
-
-    _.extend(global, { 
-        Rock : Rock
+    _.extend(global.Objects, { 
+        Rock : _inherit( global.Objects.Basic, { img : 'Rock.png' } ) 
     });
 
 })(this);

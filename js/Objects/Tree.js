@@ -1,20 +1,12 @@
 (function( global ){
     'use strict';
 
-    function TreeShort (  ){ }
-    TreeShort.prototype.sprite = 'Tree Short.png';
+    var Basic = global.Objects.Basic;
 
-    function TreeTall (  ){ }
-    TreeTall.prototype.sprite = 'Tree Tall.png';
-
-    function Bush (  ){ }
-    Bush.prototype.sprite = 'Tree Ugly.png';
-
-
-    _.extend(global, { 
-        TreeShort : TreeShort,
-        TreeTall : TreeTall,
-        Bush : Bush
+    _.extend(global.Objects, { 
+        TreeShort : _inherit( Basic , { img : 'Tree Short.png' } ) ,
+        TreeTall : _inherit( Basic, { img : 'Tree Tall.png' } ) ,
+        Bush : _inherit( Basic, { img : 'Tree Ugly.png' } ) 
     });
 
 })(this);
