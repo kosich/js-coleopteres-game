@@ -16,6 +16,7 @@ _.extend(Cursor.prototype, {
 
         this.sprite.x = this.x * CELL_X;
         this.sprite.y = this.y * CELL_Y - (this.z - 1) * CELL_Z; // cursor is shown at the bottom of current level
+        this.sprite._y = this.y;
         this.sprite._z = this.z - .1; // so it doesnt overlap block
     }
 });

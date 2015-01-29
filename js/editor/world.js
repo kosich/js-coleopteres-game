@@ -1,4 +1,4 @@
-var world = (function(){
+var world = ( function () {
     'use strict';
 
     // public properties:
@@ -18,14 +18,14 @@ var world = (function(){
 
 
     var world = {
-        init : init,
-        update : update,
-        add : add,
-        removeAt : removeAt,
-        remove : remove,
+        init: init,
+        update: update,
+        add: add,
+        removeAt: removeAt,
+        remove: remove,
 
-        exp : exp,
-        imp : imp
+        exp: exp,
+        imp: imp
     };
 
     var cells,
@@ -33,67 +33,74 @@ var world = (function(){
 
     // inits the world
     // creates area, positions selector
-    function init( renderGroup ){
+    function init( renderGroup ) {
         group = renderGroup;
         group.x += CELL_X;
-        cells = [];
+        world.cells = cells = [];
     }
 
-    function imp ( exported ){
+    function imp( exported ) {
         // reset all current settings
         // & remove all current cells
-        cells.forEach( remove );
-        console.log( 'cleared cells ', cells );
+        removeAll();
+        console.log( 'cleared cells ' );
 
         // import world properties
 
-        if ( exported.cells ){
-            cells = exported.cells.map( function( def ){
-                return (new Cell ( def.x, def.y, def.z, group ).add( Blocks.Plain ));
+        if ( exported.cells ) {
+            world.cells = cells = exported.cells.map( function ( def ) {
+                return Cell.deserialyze( def, group );
             } );
         }
 
         updateShadows();
     }
 
-    function exp (){
+    function exp() {
         // export all world properies
         // gravity or whatever
         var exported = {};
-        exported.cells = cells.map( function( cell ){
-            return {
-                x : cell.x,
-                y : cell.y,
-                z : cell.z //,
-                // item : cell.item.exp()
-            };
+        exported.cells = cells.map( function ( cell ) {
+            return cell.serialyze();
         } );
 
         return exported;
     }
 
-    function update(  ){
+    function update() {
         // properly sort the cells
-        group.customSort(function( a, b ){
-            return ( a._z - b._z ) || ( a.y - b.y );
-        });
+        var zd, yd;
+        group.customSort( function ( a, b ) {
+            zd = a._z - b._z;
+            yd = a._y - b._y;
+            return yd || zd;
+        } );
     }
 
-    function add( x, y, z, Item ){
+    function add( x, y, z, Item ) {
         // expand the field to contain the item
         var cell = getCellAt( x, y, z );
-        if ( !cell ){
+        if ( !cell ) {
             cell = new Cell( x, y, z, group );
             cells.push( cell );
         }
         // assign new item to the cell
-        cell.add( Item );
+        cell.add( new Item() );
 
         updateShadows();
     }
 
-    function remove( cell ){
-        if (!cell){
+    function removeAll(  ){
+        var len = cells.length;
+        while( --len >= 0 ){
+            cells[ len ].remove();
+        }
+        cells.splice( 0 );
+        updateShadows();
+    }
+
+    function remove( cell ) {
+        if ( !cell ) {
             console.warn( 'nothing to remove' );
             return;
         }
@@ -103,12 +110,12 @@ var world = (function(){
         updateShadows();
     }
 
-    function removeAt( x, y, z ){
-        remove ( getCellAt( x, y, z ) );
+    function removeAt( x, y, z ) {
+        remove( getCellAt( x, y, z ) );
     }
 
-    function getCellAt ( x, y, z ){
-        return cells.find( function( cell ){
+    function getCellAt( x, y, z ) {
+        return cells.find( function ( cell ) {
             // ? might use Point class with it's comparision
             return cell.x === x && cell.y === y && cell.z === z;
         } );
@@ -118,66 +125,75 @@ var world = (function(){
     // SHADOWS RENDERING :: REFACTOR 
     // {{{
     var shadows = [];
-    function updateShadows(){
-        shadows.forEach( function( shadow ){
+
+    function updateShadows() {
+
+        shadows.forEach( function ( shadow ) {
             shadow.destroy();
         } );
-        shadows.splice(0);
 
-        cells.forEach( function( cell ) {
-            if ( isABlockAt( cell.x, cell.y, cell.z +1 ) )
+        shadows.splice( 0 );
+
+        cells.forEach( function ( cell ) {
+            // cancel if current is not block
+            if ( !cell.isBlock() )
                 return;
 
-            addShadow ( {
-                r : isABlockAt( cell.x +1, cell.y, cell.z + 1 ),
-                l : isABlockAt( cell.x -1, cell.y, cell.z + 1 ),
-                t : isABlockAt( cell.x, cell.y -1, cell.z + 1 ),
-                b : isABlockAt( cell.x, cell.y +1, cell.z + 1 ),
+            // cancel if its not the topmost block
+            if ( isABlockAt( cell.x, cell.y, cell.z + 1 ) )
+                return;
 
-                tr : isABlockAt( cell.x +1, cell.y -1, cell.z + 1 ),
-                tl : isABlockAt( cell.x -1, cell.y -1, cell.z + 1 ),
-                br : isABlockAt( cell.x +1, cell.y +1, cell.z + 1 ),
-                bl : isABlockAt( cell.x -1, cell.y +1, cell.z + 1 )
+            addShadow( {
+                r: isABlockAt( cell.x + 1, cell.y, cell.z + 1 ),
+                l: isABlockAt( cell.x - 1, cell.y, cell.z + 1 ),
+                t: isABlockAt( cell.x, cell.y - 1, cell.z + 1 ),
+                b: isABlockAt( cell.x, cell.y + 1, cell.z + 1 ),
+
+                tr: isABlockAt( cell.x + 1, cell.y - 1, cell.z + 1 ),
+                tl: isABlockAt( cell.x - 1, cell.y - 1, cell.z + 1 ),
+                br: isABlockAt( cell.x + 1, cell.y + 1, cell.z + 1 ),
+                bl: isABlockAt( cell.x - 1, cell.y + 1, cell.z + 1 )
             }, cell );
-        });
+        } );
     }
 
-    function isABlockAt ( x, y, z ){
-        var cell = getCellAt( x, y, z);
+    function isABlockAt( x, y, z ) {
+        var cell = getCellAt( x, y, z );
         if ( !cell )
             return false;
 
-        return cell.item && cell.item instanceof Blocks.Basic;
+        return cell.isBlock();
     }
 
-    function addShadow( list, cell ){
+    function addShadow( list, cell ) {
         list.tr = list.tr & !( list.t || list.r );
         list.tl = list.tl & !( list.t || list.l );
         list.br = list.br & !( list.b || list.r );
         list.bl = list.bl & !( list.b || list.l );
 
-        Object.keys( list ).forEach( function( key ){
-            if (!list[ key ])
+        Object.keys( list ).forEach( function ( key ) {
+            if ( !list[ key ] )
                 return;
 
             console.log( 'got shadow @ ', key );
             var sprite = group.create( cell.x * CELL_X, cell.y * CELL_Y - cell.z * CELL_Z, shadowImages[ key ] );
-            sprite._z = cell.z + 0.1;
+            sprite._y = cell.y;
+            sprite._z = cell.z + 0.1; // shadows are slightly heigher then cells themeselves
             shadows.push( sprite );
         } );
     }
 
     var shadowImages = {
-        r : 'Shadow East.png',
-        l : 'Shadow West.png',
-        t : 'Shadow North.png',
-        b : 'Shadow South.png',
-        tr : 'Shadow North East.png',
-        tl : 'Shadow North West.png',
-        br : 'Shadow South East.png',
-        bl : 'Shadow South West.png'
+        r: 'Shadow East.png',
+        l: 'Shadow West.png',
+        t: 'Shadow North.png',
+        b: 'Shadow South.png',
+        tr: 'Shadow North East.png',
+        tl: 'Shadow North West.png',
+        br: 'Shadow South East.png',
+        bl: 'Shadow South West.png'
     };
     // }}}
 
     return world;
-})();
+} )();

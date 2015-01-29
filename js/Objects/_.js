@@ -1,11 +1,11 @@
-(function( global ){
+( function ( global ) {
     'use strict';
 
-    function BasicObject (  ){ }
     global.Objects = {
-        Basic : BasicObject
+        BasicObject: _inherit( Basic, {
+            _namespace: 'Objects',
+            _type: 'BasicObject'
+        } )
     };
 
-})(this);
-
-
+} )( this );
