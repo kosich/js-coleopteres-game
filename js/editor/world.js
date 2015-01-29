@@ -162,7 +162,8 @@ var world = ( function () {
         if ( !cell )
             return false;
 
-        return cell.isBlock();
+        // ramps don't cast shadows
+        return cell.isBlock() && !cell.isRamp();
     }
 
     function addShadow( list, cell ) {

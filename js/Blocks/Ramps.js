@@ -5,6 +5,7 @@
     } );
 
     _.extend( Blocks, {
+        Ramp : Ramp,
         RampEast : _inherit( Ramp, {
             _type : 'RampEast',
             img : 'Ramp East.png',

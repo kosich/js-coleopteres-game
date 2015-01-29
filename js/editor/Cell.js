@@ -46,6 +46,10 @@
         isBlock: function isBlock() {
             // TODO: set it on item add/remove
             return this.item && this.item instanceof Blocks.Block;
+        },
+
+        isRamp : function isRamp (){
+            return this.item && this.item instanceof Blocks.Ramp;
         }
 
     } );
