@@ -25,8 +25,8 @@
         Items: Object.keys( Items ).map( function ( key ) {
             return Items[ key ];
         } ),
-        Player: undefined,
-        Enemy: undefined
+        Player: Player,
+        Enemy: Enemy
     };
 
     var helperImages = [
@@ -35,44 +35,17 @@
         'Shadow West.png',
         'Shadow North.png',
         'Shadow South.png',
-        'Shadow Side West.png',
         'Shadow North East.png',
         'Shadow North West.png',
         'Shadow South East.png',
         'Shadow South West.png'
     ];
 
-    // items
-    //     key
-    //     tellyport
-
-    // objects
-    //     tree
-    //     bush
-    //     rock
-
-    // player
-    // enemy
-
-    // 'Key.png',
-
-    // 'Gem Blue.png',
-    // 'Gem Green.png',
-    // 'Gem Orange.png',
-
-    // 'Tree Short.png',
-    // 'Tree Tall.png',
-    // 'Tree Ugly.png',
-    // 'Rock.png',
-
-    // 'Enemy Bug.png',
-    // 'Character Boy.png'
-
     var items = [],
         toolBoxGroup, cellGroup;
 
     var e = new Phaser.Game(
-        1200, 900, Phaser.AUTO, 'gamepane', {
+        1100, 648, Phaser.AUTO, 'gamepane', {
             preload: preload,
             create: create,
             update: update,
@@ -85,6 +58,8 @@
         Tools.Blocks.forEach( loadTool );
         Tools.Objects.forEach( loadTool );
         Tools.Items.forEach( loadTool );
+        loadTool( Tools.Player );
+        loadTool( Tools.Enemy );
 
         function loadTool( Tool ) {
             if ( Tool.prototype.img )
@@ -112,6 +87,7 @@
         Tools.Blocks
             .concat( Tools.Objects )
             .concat( Tools.Items )
+            .concat( [ Tools.Player, Tools.Enemy ] )
             .filter( function ( Tool ) {
                 return !!Tool.prototype.img;
             } )
@@ -123,11 +99,12 @@
                 items.push( item );
             } );
 
-        toolBoxGroup.scale.set( 0.25, 0.25 );
+        toolBoxGroup.scale.set( 0.15, 0.15 );
         toolBoxGroup.y += CELL_Y / 2;
         toolBoxGroup.x += CELL_Y / 2;
 
         cellGroup.x += CELL_X;
+        cellGroup.scale.set( 0.5, 0.5 );
 
         // toolbox current
         setCurrent( 0 );

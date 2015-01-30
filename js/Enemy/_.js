@@ -1,32 +1,37 @@
 // Enemies our player must avoid
-function Enemy ( speed ) {
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
-    this.speed = speed;
-    this.resetPower();
-};
+var Enemy = _inherit( Basic, {
+    img: 'Enemy Bug.png',
+    _type : 'Enemy',
 
-_.extend( Enemy.prototype, {
-    canInhabbit : function ( type ){
+    canInhabbit: function ( type ) {
         return type === 0;
     },
-    resetPower : function(){
+    resetPower: function () {
         this.power = 1000 / this.speed;
     },
-    sprite : 'Enemy Bug.png',
-    update : function(dt) {
+    update: function ( dt ) {
         // console.log( 'time delta : ', dt, ' power ', this.power);
         this.power -= dt;
-        if ( this.power < 0 ){
-            world.move ( this, { x : 1, y : 0 });
+        if ( this.power < 0 ) {
+            world.move( this, {
+                x: 1,
+                y: 0
+            } );
             this.resetPower();
         }
     },
-    destroy : function(){
-        if ( this._onDestroy)
+    destroy: function () {
+        if ( this._onDestroy )
             this._onDestroy();
     },
-    onDestroy : function( handler ){
+    onDestroy: function ( handler ) {
         this._onDestroy = handler;
+    }
+}, {
+    init: function Enemy_init( speed ) {
+        // The image/sprite for our enemies, this uses
+        // a helper we've provided to easily load images
+        this.speed = speed;
+        this.resetPower();
     }
 } );

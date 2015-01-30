@@ -5,9 +5,11 @@
     <link rel='stylesheet' href='css/style.css'>
 </head>
 <body>
-    <a href='/' >game</a>
-    <a href='#' onclick='saveLevel()'>save</a>
-    <a href='#' onclick='loadLevel()'>load</a>
+    <div class='nav'>
+        <a href='/' >game</a>
+        <a href='#' onclick='saveLevel()'>save</a>
+        <a href='#' onclick='loadLevel()'>load</a>
+    </div>
     <!-- vendors -->
     <script src='bower_components/underscore/underscore.js'></script>
     <script src='/bower_components/phaser-official/build/phaser.js'></script>
@@ -30,6 +32,9 @@
     <script src='js/Objects/_.js'></script>
     <script src='js/Objects/Rock.js'></script>
     <script src='js/Objects/Tree.js'></script>
+
+    <script src='js/Enemy/_.js'></script>
+    <script src='js/Player/_.js'></script>
 
     <script src='js/editor/main.js'></script>
 </body>

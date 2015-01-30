@@ -1,14 +1,10 @@
-function Player(){
-    Enemy.apply( this, arguments );
-    this.movementDirection = { x: 0, y: 0 };
-};
-Player.prototype = Object.create( Enemy.prototype );
-_.extend( Player.prototype, {
-    constructor : Player,
+var Player = _inherit( Enemy, {
+    img : 'Character Boy.png',
+    _type : 'Player',
+
     canInhabbit : function canInhabbit( type ){
         return type in [ 0, 1 ];
     },
-    sprite : 'Character Boy.png',
     resetDirection : function resetDirection(){
         this.movementDirection.x = 0;
         this.movementDirection.y = 0;
@@ -32,7 +28,13 @@ _.extend( Player.prototype, {
     onDeath : function( handler ){
         this.onDeathHandler = handler;
     }
-});
+} , {
+    init: function Player_init(){
+        Enemy.apply( this, arguments );
+        this.movementDirection = { x: 0, y: 0 };
+    }
+} );
+
 
 var directions = {
     left :  { x: -1  , y: 0 } ,
@@ -40,4 +42,3 @@ var directions = {
     right : { x: 1  , y: 0  } ,
     down :  { x: 0  , y: 1  }
 };
-
