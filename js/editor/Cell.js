@@ -67,7 +67,7 @@
     });
 
     function addSprite( rg, img, x, y, z ) {
-        console.log( 'puting item to ', x, y, z );
+        // console.log( 'puting item to ', x, y, z );
         var sprite = rg.create( x * CELL_X, y * CELL_Y - z * CELL_Z, img );
         sprite._y = y;
         sprite._z = z;

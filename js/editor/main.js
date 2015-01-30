@@ -22,6 +22,9 @@
         Objects: Object.keys( Objects ).map( function ( key ) {
             return Objects[ key ];
         } ),
+        Items: Object.keys( Items ).map( function ( key ) {
+            return Items[ key ];
+        } ),
         Player: undefined,
         Enemy: undefined
     };
@@ -81,6 +84,7 @@
         // moveout to some global function
         Tools.Blocks.forEach( loadTool );
         Tools.Objects.forEach( loadTool );
+        Tools.Items.forEach( loadTool );
 
         function loadTool( Tool ) {
             if ( Tool.prototype.img )
@@ -105,7 +109,9 @@
         toolBoxGroup = e.add.group();
 
         var item;
-        Tools.Blocks.concat( Tools.Objects )
+        Tools.Blocks
+            .concat( Tools.Objects )
+            .concat( Tools.Items )
             .filter( function ( Tool ) {
                 return !!Tool.prototype.img;
             } )
@@ -117,7 +123,7 @@
                 items.push( item );
             } );
 
-        toolBoxGroup.scale.set( .5, .5 );
+        toolBoxGroup.scale.set( 0.25, 0.25 );
         toolBoxGroup.y += CELL_Y / 2;
         toolBoxGroup.x += CELL_Y / 2;
 
@@ -129,12 +135,21 @@
         world.init( cellGroup );
 
         cursor = new Cursor( cellGroup.create( 0, 0, 'Selector.png' ) );
+        e.add.tween( cursor.sprite )
+            .to( {
+                alpha: .5
+            }, 1500, Phaser.Easing.Quadratic.InOut )
+            .to( {
+                alpha: 1
+            }, 1500, Phaser.Easing.Quadratic.InOut )
+            .loop()
+            .start();
 
         e.world.setBounds( 0, 0, 2000, 2000 );
         e.camera.follow( cursor.sprite );
 
         // preload
-        // world.imp( JSON.parse( '{"cells":[{"x":1,"y":2,"z":0},{"x":2,"y":2,"z":0},{"x":3,"y":2,"z":0},{"x":4,"y":2,"z":0},{"x":4,"y":3,"z":0},{"x":3,"y":3,"z":0},{"x":2,"y":3,"z":0},{"x":1,"y":3,"z":0},{"x":1,"y":4,"z":0},{"x":2,"y":4,"z":0},{"x":3,"y":4,"z":0},{"x":4,"y":4,"z":0},{"x":3,"y":5,"z":0},{"x":4,"y":5,"z":0},{"x":2,"y":5,"z":0},{"x":1,"y":5,"z":0},{"x":2,"y":4,"z":1},{"x":2,"y":3,"z":1},{"x":3,"y":3,"z":1},{"x":3,"y":4,"z":1},{"x":6,"y":4,"z":0},{"x":6,"y":3,"z":0},{"x":6,"y":2,"z":0},{"x":7,"y":2,"z":0},{"x":7,"y":3,"z":0},{"x":8,"y":3,"z":0},{"x":8,"y":2,"z":0},{"x":8,"y":4,"z":0},{"x":7,"y":4,"z":0},{"x":7,"y":3,"z":1},{"x":7,"y":4,"z":1},{"x":7,"y":5,"z":0},{"x":6,"y":5,"z":0},{"x":8,"y":5,"z":0},{"x":5,"y":5,"z":-1},{"x":5,"y":4,"z":-1},{"x":5,"y":3,"z":-1},{"x":5,"y":2,"z":-1},{"x":5,"y":3,"z":0},{"x":6,"y":3,"z":1}]}' ) );
+        loadLevel();
 
         // TODO: refactor to proper
         document.addEventListener( 'keydown', function ( e ) {
@@ -273,7 +288,7 @@
         console.log( 'saved' );
     }
 
-    global.loadLevel = function loadLevel(){
+    var loadLevel = global.loadLevel = function loadLevel(){
         console.log( 'loading' );
         var value = localStorage.getItem( LOCAL_STORAGE_LEVEL_KEY );
         if ( !value )

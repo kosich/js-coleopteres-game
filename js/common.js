@@ -44,7 +44,7 @@
             var object =  new global[ typeDefinition.namespace ][ typeDefinition.type ]();
         } catch ( exc ){
             console.error('failed to instance', typeDefinition );
-            throw exc;
+            // throw exc;
         }
         return object;
     };

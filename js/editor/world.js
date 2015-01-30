@@ -36,7 +36,7 @@ var world = ( function () {
     function init( renderGroup ) {
         group = renderGroup;
         group.x += CELL_X;
-        world.cells = cells = [];
+        cells = [];
     }
 
     function imp( exported ) {
@@ -48,9 +48,11 @@ var world = ( function () {
         // import world properties
 
         if ( exported.cells ) {
-            world.cells = cells = exported.cells.map( function ( def ) {
-                return Cell.deserialyze( def, group );
-            } );
+            cells = exported.cells.map( function ( def ) {
+                try{
+                    return Cell.deserialyze( def, group );
+                } catch( exc ){ }
+            } ).filter( function( cell ){ return !!cell; } );
         }
 
         updateShadows();
@@ -176,7 +178,7 @@ var world = ( function () {
             if ( !list[ key ] )
                 return;
 
-            console.log( 'got shadow @ ', key );
+            // console.log( 'got shadow @ ', key );
             var sprite = group.create( cell.x * CELL_X, cell.y * CELL_Y - cell.z * CELL_Z, shadowImages[ key ] );
             sprite._y = cell.y;
             sprite._z = cell.z + 0.1; // shadows are slightly heigher then cells themeselves
