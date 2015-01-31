@@ -115,18 +115,18 @@
         e.add.tween( cursor.sprite )
             .to( {
                 alpha: .5
-            }, 1500, Phaser.Easing.Quadratic.InOut )
+            }, 1000, Phaser.Easing.Quadratic.InOut )
             .to( {
                 alpha: 1
-            }, 1500, Phaser.Easing.Quadratic.InOut )
+            }, 1000, Phaser.Easing.Quadratic.InOut )
             .loop()
             .start();
 
-        e.world.setBounds( 0, 0, 2000, 2000 );
+        e.world.setBounds( 0, -50, 2000, 2000 );
         e.camera.follow( cursor.sprite );
 
         // preload
-        loadLevel();
+        levelProvider.load();
 
         // TODO: refactor to proper
         document.addEventListener( 'keydown', function ( e ) {
@@ -258,21 +258,5 @@
         e.debug.text( cursor.z, 2, 14, "#a7aebe" );
     }
 
-    var LOCAL_STORAGE_LEVEL_KEY = 'editingLevel';
-    global.saveLevel = function saveLevel(){
-        console.log( 'saving' );
-        localStorage.setItem( LOCAL_STORAGE_LEVEL_KEY, JSON.stringify( world.exp() ) );
-        console.log( 'saved' );
-    }
-
-    var loadLevel = global.loadLevel = function loadLevel(){
-        console.log( 'loading' );
-        var value = localStorage.getItem( LOCAL_STORAGE_LEVEL_KEY );
-        if ( !value )
-            return;
-
-        world.imp( JSON.parse( value ) );
-        console.log( 'loaded' );
-    }
 
 } )( this );
