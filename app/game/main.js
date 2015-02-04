@@ -7,7 +7,7 @@ define([ 'phaser', 'game/gameworld', 'levelProvider', 'assets' ], function( Phas
         player,
         renderGroup;
 
-    var game = new Phaser.Game(1200, 1000, Phaser.AUTO, 'gamepane', {
+    var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'gamepane', {
         preload : preload,
         create: create,
         update: update,
@@ -30,7 +30,7 @@ define([ 'phaser', 'game/gameworld', 'levelProvider', 'assets' ], function( Phas
 
         renderGroup = game.add.group();
 
-        world = new GameWorld( renderGroup );
+        world = new GameWorld( renderGroup, this );
         world.load( levelProvider.load() );
 
         player = world.player;
@@ -39,7 +39,6 @@ define([ 'phaser', 'game/gameworld', 'levelProvider', 'assets' ], function( Phas
 
         // Make the default camera follow the ufo.
         game.camera.follow(player.sprite);
-        game.world.setBounds(0, 0, 2000, 2000);
 
         // world.player.onDeath( init );
 
@@ -67,36 +66,8 @@ define([ 'phaser', 'game/gameworld', 'levelProvider', 'assets' ], function( Phas
     function update( game ) {
         // update world
         world.update( game.time.elapsed );
-        // world.enemies.forEach( updateMovable );
-        updateMovable( player );
         world.updateRenderSort();
     }
-
-    var coor = {
-        x: function getX( c ) {
-            return c.x * CELL_X;
-        },
-        y: function getY( c ) {
-            return c.y * CELL_Y - c.z * CELL_Z;
-        }
-    };
-
-
-    function updateMovable( item ) {
-        item.x += item.movementDirection.x;
-        item.y += item.movementDirection.y;
-        item.sprite._y = item.y;
-        item.sprite._z = item.z;
-        item.movementDirection.x = 0; 
-        item.movementDirection.y = 0; 
-        game.add.tween( item.sprite )
-            .to( {
-                x: coor.x( item ),
-                y: coor.y( item )
-            }, 30, Phaser.Easing.Linear.None )
-            .start();
-        
-    }   
 
 
     function render() { }
