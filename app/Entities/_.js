@@ -1,15 +1,15 @@
-define( [ 'Entities/Blocks/_', 'Entities/Objects/_', 'Entities/Items/_', './Enemy/_', './Player/_' ], function ( Blocks, Objects, Items, Enemy, Player ) {
-    'use strict';
+'use strict';
 
-    var Entities = {
-        Items: Items,
-        Objects: Objects,
-        Blocks: Blocks,
-        Enemy : Enemy,
-        Player : Player
-    };
+var Blocks = require( './Blocks/_.js' );//,
+    // Items = require( './Items/_.js' ),
+    // Objects = require( './Objects/_.js' ),
+    // Enemy = require( './Enemy/_.js' ),
+    // Player = require( './Player/_.js' );
 
-    console.log( ' Entities', Entities );
-
-    return Entities;
-} );
+module.exports = {
+    // Items: Items,
+    // Objects: Objects,
+    Blocks: Blocks,
+    // Enemy : Enemy,
+    // Player : Player
+};

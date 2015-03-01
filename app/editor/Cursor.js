@@ -1,3 +1,6 @@
+'use strict';
+
+var _ = require( 'lodash' );
 
 // CURSOR
 function Cursor( sprite ){
@@ -21,3 +24,4 @@ _.extend(Cursor.prototype, {
     }
 });
 
+module.exports = Cursor;
