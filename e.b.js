@@ -46,7 +46,7 @@
 
 	'use strict';
 
-	var Phaser = __webpack_require__( 8 ),
+	var Phaser = __webpack_require__( 11 ),
 
 	    levelProvider = __webpack_require__( 1 ),
 	    Cursor = __webpack_require__( 2 ),
@@ -63,8 +63,6 @@
 	//
 	// Editor has it's own world
 
-	debugger;
-
 	var currentItem = 0,
 	    cursor;
 
@@ -75,11 +73,11 @@
 	    Objects: Object.keys( Entities.Objects ).map( function ( key ) {
 	        return Entities.Objects[ key ];
 	    } ),
-	    // Items: Object.keys( Items ).map( function ( key ) {
-	    //     return Items[ key ];
-	    // } ),
-	    // Player: Player,
-	    // Enemy: Enemy
+	    Items: Object.keys( Entities.Items ).map( function ( key ) {
+	        return Entities.Items[ key ];
+	    } ),
+	    Player: Entities.Player,
+	    Enemy: Entities.Enemy
 	};
 
 	var helperImages = [
@@ -111,9 +109,9 @@
 	    // moveout to some global function
 	    Tools.Blocks.forEach( loadTool );
 	    Tools.Objects.forEach( loadTool );
-	    // Tools.Items.forEach( loadTool );
-	    // loadTool( Tools.Player );
-	    // loadTool( Tools.Enemy );
+	    Tools.Items.forEach( loadTool );
+	    loadTool( Tools.Player );
+	    loadTool( Tools.Enemy );
 
 	    function loadTool( tool ) {
 	        if ( tool.prototype.img ) {
@@ -140,8 +138,8 @@
 	    var item;
 	    Tools.Blocks
 	        .concat( Tools.Objects )
-	        // .concat( Tools.Items )
-	        // .concat( [ Tools.Player, Tools.Enemy ] )
+	        .concat( Tools.Items )
+	        .concat( [ Tools.Player, Tools.Enemy ] )
 	        .filter( function ( Tool ) {
 	            return !!Tool.prototype.img;
 	        } )
@@ -180,7 +178,8 @@
 	    e.camera.follow( cursor.sprite );
 
 	    // preload
-	    levelProvider.load();
+	    var exported = levelProvider.load();
+	    world.imp( exported );
 
 	    // TODO: refactor to proper
 	    document.addEventListener( 'keydown', function ( e ) {
@@ -354,7 +353,7 @@
 
 	'use strict';
 
-	var _ = __webpack_require__( 9 );
+	var _ = __webpack_require__( 12 );
 
 	// CURSOR
 	function Cursor( sprite ){
@@ -428,10 +427,14 @@
 	}
 
 	function imp( exported ) {
+	    console.group( 'importing' );
+
+	    console.log( 'going to import' , exported );
+
 	    // reset all current settings
 	    // & remove all current cells
 	    removeAll();
-	    console.log( 'cleared cells ' );
+	    console.log( 'cleared cells' );
 
 	    // import world properties
 
@@ -439,11 +442,16 @@
 	        cells = exported.cells.map( function ( def ) {
 	            try{
 	                return Cell.deserialyze( def, group );
-	            } catch( exc ){ }
+	            } catch( exc ){
+	                console.error( 'Failed to import', def , 'due to', exc);
+	                throw exc;
+	            }
 	        } ).filter( function( cell ){ return !!cell; } );
 	    }
 
 	    updateShadows();
+
+	    console.groupEnd();
 	}
 
 	function exp() {
@@ -505,10 +513,10 @@
 	}
 
 	function getCellAt( x, y, z ) {
-	    return cells.find( function ( cell ) {
+	    return cells.filter( function ( cell ) {
 	        // ? might use Point class with it's comparision
 	        return cell.x === x && cell.y === y && cell.z === z;
-	    } );
+	    } )[ 0 ];
 	}
 
 
@@ -596,19 +604,17 @@
 	'use strict';
 
 	var Blocks = __webpack_require__( 6 ),
-	    // Items = require( './Items/_.js' ),
-	    Objects = __webpack_require__( 7 ),
-	    // Enemy = require( './Enemy/_.js' ),
-	    // Player = require( './Player/_.js' );
-
-	    removeme;
+	    Items = __webpack_require__( 7 ),
+	    Objects = __webpack_require__( 8 ),
+	    Enemy = __webpack_require__( 9 ),
+	    Player = __webpack_require__( 10 );
 
 	module.exports = {
-	    // Items: Items,
+	    Items: Items,
 	    Objects: Objects,
 	    Blocks: Blocks,
-	    // Enemy : Enemy,
-	    // Player : Player
+	    Enemy : Enemy,
+	    Player : Player
 	};
 
 
@@ -618,7 +624,9 @@
 
 	'use strict';
 
-	var _ = __webpack_require__( 9 );
+	var _ = __webpack_require__( 12 ),
+	    Basic = __webpack_require__( 13 ),
+	    Entities = __webpack_require__( 4 );
 
 	function Cell( x, y, z, renderGroup ) {
 	    this.x = x;
@@ -664,11 +672,11 @@
 	    // META
 	    isBlock: function isBlock() {
 	        // TODO: set it on item add/remove
-	        return this.item && this.item instanceof Blocks.Block;
+	        return this.item && this.item instanceof Entities.Blocks.Block;
 	    },
 
 	    isRamp : function isRamp (){
-	        return this.item && this.item instanceof Blocks.Ramp;
+	        return this.item && this.item instanceof Entities.Blocks.Ramp;
 	    }
 
 	} );
@@ -702,10 +710,10 @@
 
 	'use strict';
 
-	var _ = __webpack_require__( 9 ),
-	    Block = __webpack_require__(10),
-	    Blocks = __webpack_require__(11),
-	    Ramps  = __webpack_require__( 12 );
+	var _ = __webpack_require__( 12 ),
+	    Block = __webpack_require__(14),
+	    Blocks = __webpack_require__(15),
+	    Ramps  = __webpack_require__( 16 );
 
 	var b = _.extend({ Block : Block }, Blocks, Ramps);
 
@@ -718,10 +726,33 @@
 
 	'use strict';
 
-	var _ = __webpack_require__( 9 ),
-	    BasicObject = __webpack_require__(13),
-	    Rock = __webpack_require__(14),
-	    Trees = __webpack_require__(15);
+	var _ = __webpack_require__( 12 ),
+	    Item = __webpack_require__( 17 ),
+	    Key = __webpack_require__( 18 ),
+	    tellyports = __webpack_require__( 19 );
+
+	var Items = {
+	    Item : Item,
+	    Key : Key
+	};
+
+	// add tellyports [0,1,2]
+	_.extend( Items, tellyports );
+
+	module.exports = Items;
+
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _ = __webpack_require__( 12 ),
+	    BasicObject = __webpack_require__(20),
+	    Rock = __webpack_require__(21),
+	    Trees = __webpack_require__(22);
 
 	var Objects = {
 	    BasicObject : BasicObject,
@@ -735,7 +766,115 @@
 
 
 /***/ },
-/* 8 */
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var common = __webpack_require__(23),
+	    Basic = __webpack_require__(13);
+
+	// Enemies our player must avoid
+	var Enemy = common._inherit( Basic, {
+	    img: 'Enemy Bug.png',
+	    _type : 'Enemy',
+
+	    canInhabbit: function ( type ) {
+	        return type === 0;
+	    },
+	    resetPower: function () {
+	        this.power = 1000 / this.speed;
+	    },
+	    update: function ( dt ) {
+	        // console.log( 'time delta : ', dt, ' power ', this.power);
+	        this.power -= dt;
+	        if ( this.power < 0 ) {
+	            world.move( this, {
+	                x: 1,
+	                y: 0
+	            } );
+	            this.resetPower();
+	        }
+	    },
+	    destroy: function () {
+	        if ( this._onDestroy )
+	            this._onDestroy();
+	    },
+	    onDestroy: function ( handler ) {
+	        this._onDestroy = handler;
+	    }
+	}, {
+	    init: function Enemy_init( speed ) {
+	        // The image/sprite for our enemies, this uses
+	        // a helper we've provided to easily load images
+	        this.speed = speed;
+	        this.resetPower();
+	    }
+	} );
+
+	module.exports =  Enemy;
+
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var common = __webpack_require__(23),
+	    Enemy = __webpack_require__(9);
+
+	var Player = common._inherit( Enemy, {
+	    img : 'Character Boy.png',
+	    _type : 'Player',
+
+	    canInhabbit : function canInhabbit( type ){
+	        return type in [ 0, 1 ];
+	    },
+	    resetDirection : function resetDirection(){
+	        this.movementDirection.x = 0;
+	        this.movementDirection.y = 0;
+	    },
+	    update : function update(dt) {
+	        if ( !this.movementDirection )
+	            return;
+
+	        world.move ( this, this.movementDirection );
+	        this.resetDirection();
+	    },
+	    handleInput : function handleInput( direction ) {
+	        if ( direction in directions )
+	            this.movementDirection = _.extend({}, directions[ direction ]);
+	    },
+	    die : function die(){
+	        console.warn( 'You\'ve just been bugged' );
+	        if ( this.onDeathHandler )
+	            this.onDeathHandler();
+	    },
+	    onDeath : function( handler ){
+	        this.onDeathHandler = handler;
+	    }
+	} , {
+	    init: function Player_init(){
+	        Enemy.apply( this, arguments );
+	        this.movementDirection = { x: 0, y: 0 };
+	    }
+	} );
+
+	var directions = {
+	    left :  { x: -1  , y: 0 } ,
+	    up :    { x: 0 , y: -1  } ,
+	    right : { x: 1  , y: 0  } ,
+	    down :  { x: 0  , y: 1  }
+	};
+
+	module.exports = Player;
+
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -745,25 +884,17 @@
 	 * manifests/phaser.json
 	 */
 
-	module.exports = __webpack_require__(16);
+	module.exports = __webpack_require__(24);
 
-	__webpack_require__(17);
-
-	__webpack_require__(18);
-	__webpack_require__(19);
-	__webpack_require__(20);
-	__webpack_require__(21);
-	__webpack_require__(22);
-	__webpack_require__(23);
-
-	__webpack_require__(24);
 	__webpack_require__(25);
+
 	__webpack_require__(26);
 	__webpack_require__(27);
 	__webpack_require__(28);
 	__webpack_require__(29);
 	__webpack_require__(30);
 	__webpack_require__(31);
+
 	__webpack_require__(32);
 	__webpack_require__(33);
 	__webpack_require__(34);
@@ -771,7 +902,6 @@
 	__webpack_require__(36);
 	__webpack_require__(37);
 	__webpack_require__(38);
-
 	__webpack_require__(39);
 	__webpack_require__(40);
 	__webpack_require__(41);
@@ -780,10 +910,10 @@
 	__webpack_require__(44);
 	__webpack_require__(45);
 	__webpack_require__(46);
+
 	__webpack_require__(47);
 	__webpack_require__(48);
 	__webpack_require__(49);
-
 	__webpack_require__(50);
 	__webpack_require__(51);
 	__webpack_require__(52);
@@ -792,6 +922,7 @@
 	__webpack_require__(55);
 	__webpack_require__(56);
 	__webpack_require__(57);
+
 	__webpack_require__(58);
 	__webpack_require__(59);
 	__webpack_require__(60);
@@ -800,16 +931,13 @@
 	__webpack_require__(63);
 	__webpack_require__(64);
 	__webpack_require__(65);
-
 	__webpack_require__(66);
 	__webpack_require__(67);
 	__webpack_require__(68);
 	__webpack_require__(69);
-
 	__webpack_require__(70);
 	__webpack_require__(71);
 	__webpack_require__(72);
-
 	__webpack_require__(73);
 
 	__webpack_require__(74);
@@ -822,6 +950,7 @@
 	__webpack_require__(80);
 
 	__webpack_require__(81);
+
 	__webpack_require__(82);
 	__webpack_require__(83);
 	__webpack_require__(84);
@@ -834,9 +963,9 @@
 	__webpack_require__(89);
 	__webpack_require__(90);
 	__webpack_require__(91);
-
 	__webpack_require__(92);
 	__webpack_require__(93);
+
 	__webpack_require__(94);
 	__webpack_require__(95);
 	__webpack_require__(96);
@@ -848,9 +977,9 @@
 	__webpack_require__(100);
 	__webpack_require__(101);
 	__webpack_require__(102);
-
 	__webpack_require__(103);
 	__webpack_require__(104);
+
 	__webpack_require__(105);
 	__webpack_require__(106);
 	__webpack_require__(107);
@@ -858,11 +987,13 @@
 	__webpack_require__(108);
 	__webpack_require__(109);
 	__webpack_require__(110);
+
 	__webpack_require__(111);
 	__webpack_require__(112);
 	__webpack_require__(113);
 	__webpack_require__(114);
 	__webpack_require__(115);
+
 	__webpack_require__(116);
 	__webpack_require__(117);
 	__webpack_require__(118);
@@ -871,10 +1002,18 @@
 	__webpack_require__(121);
 	__webpack_require__(122);
 	__webpack_require__(123);
+	__webpack_require__(124);
+	__webpack_require__(125);
+	__webpack_require__(126);
+	__webpack_require__(127);
+	__webpack_require__(128);
+	__webpack_require__(129);
+	__webpack_require__(130);
+	__webpack_require__(131);
 
 
 /***/ },
-/* 9 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/**
@@ -12305,16 +12444,63 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(126)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(132)(module), (function() { return this; }())))
 
 /***/ },
-/* 10 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var common = __webpack_require__(124),
-	    Basic = __webpack_require__(125);
+	// Etities are needed only on deserialyze()
+
+	function Basic() {}
+
+	Basic.prototype.typeDefinition = function () {
+	    return {
+	        type: this._type,
+	        namespace: this._namespace
+	    };
+	};
+
+	Basic.prototype.serialyze = function serialyze() {
+	    var result = {};
+	    result.type = this.typeDefinition();
+	    return result;
+	};
+
+	// STATIC METHODS
+	// this is wicked,
+	// consider refactoring to some fabric or similar
+	Basic.deserialyze = function deserialyze( serialyzed ) {
+	    var typeDefinition = serialyzed.type,
+	        ns,
+	        object;
+	    if ( !typeDefinition )
+	        throw 'cannot deserialyze empty type';
+
+	    try {
+	        var Entities = __webpack_require__(4);
+	        ns = Entities[ typeDefinition.namespace ];
+	        object = new ( ns || Entities )[ typeDefinition.type ]();
+	    } catch ( exc ) {
+	        console.warn( 'failed to deserialyze item', Entities, typeDefinition );
+	        throw exc;
+	    }
+	    return object;
+	};
+
+	module.exports = Basic;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var common = __webpack_require__(23),
+	    Basic = __webpack_require__(13);
 
 	module.exports = common._inherit( Basic, {
 	    _type: 'Block',
@@ -12323,13 +12509,13 @@
 
 
 /***/ },
-/* 11 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var common = __webpack_require__(124),
-	    Block =  __webpack_require__(10);
+	var common = __webpack_require__(23),
+	    Block =  __webpack_require__(14);
 
 	module.exports = {
 	    Stone : common._inherit( Block, { img: 'Stone Block.png', _type: 'Stone' } ),
@@ -12344,13 +12530,13 @@
 
 
 /***/ },
-/* 12 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var common = __webpack_require__(124),
-	    Block = __webpack_require__(10);
+	var common = __webpack_require__(23),
+	    Block = __webpack_require__(14);
 
 	var Ramp = common._inherit( Block, { } );
 
@@ -12380,13 +12566,80 @@
 
 
 /***/ },
-/* 13 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var common = __webpack_require__(124),
-	    Basic = __webpack_require__(125);
+	var common = __webpack_require__(23),
+	    Basic = __webpack_require__(13);
+
+	var Item = common._inherit( Basic, {
+	    _type: 'Item',
+	    _namespace: 'Items',
+
+	    activate: function () {}
+	} );
+
+	module.exports = Item;
+
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var common = __webpack_require__(23),
+	    Item = __webpack_require__( 17 );
+
+	var Key = common._inherit( Item , {
+	    img : 'Key.png',
+	    _type : 'Key'
+	});
+
+	module.exports = Key;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var common = __webpack_require__(23),
+	    Item = __webpack_require__( 17 );
+
+	var Tellyport = common._inherit( Item, {} );
+
+	var types = {
+	    '0' : 'Gem Blue.png',
+	    '1' : 'Gem Green.png',
+	    '2' : 'Gem Orange.png'
+	};
+
+	var tellyports = {};
+
+	Object.keys( types ).forEach( function ( key ){
+	    tellyports[ 'Tellyport' + key ] = common._inherit( Tellyport, {
+	        img: types[ key ],
+	        _type : 'Tellyport' + key
+	    } );
+	} );
+
+	module.exports = tellyports;
+
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var common = __webpack_require__(23),
+	    Basic = __webpack_require__(13);
 
 	var BasicObject =  common._inherit( Basic, {
 	    _namespace: 'Objects',
@@ -12397,13 +12650,13 @@
 
 
 /***/ },
-/* 14 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var common = __webpack_require__(124),
-	    BasicObject = __webpack_require__(13);
+	var common = __webpack_require__(23),
+	    BasicObject = __webpack_require__(20);
 
 	var Rock = common._inherit( BasicObject, {
 	    img: 'Rock.png',
@@ -12414,13 +12667,13 @@
 
 
 /***/ },
-/* 15 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var common = __webpack_require__(124),
-	    BasicObject = __webpack_require__(13);
+	var common = __webpack_require__(23),
+	    BasicObject = __webpack_require__(20);
 
 	var Trees = {
 	    TreeShort: common._inherit( BasicObject, {
@@ -12441,7 +12694,42 @@
 
 
 /***/ },
-/* 16 */
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _ = __webpack_require__( 12 );
+
+	///{{{ just usual inherit sugar
+	function _inherit ( P, proto, meta ){
+	    if ( !P )
+	        console.error('inherriting', proto, ' from undefined ', P);
+
+	    var N = function N(){
+	        P.apply( this, arguments );
+	        if ( meta && meta.init ){
+	            meta.init.apply( this, arguments );
+	        }
+	    };
+	    N.prototype = Object.create( P.prototype );
+	    // N.prototype.constructor = N;
+	    Object.defineProperty( N.prototype, 'constructor', {
+	        value : N,
+	        enumerable : false
+	    } );
+	    _.extend(N.prototype, proto );
+	    return N;
+	}
+	//}}}
+
+	module.exports =  {
+	    _inherit : _inherit
+	};
+
+
+/***/ },
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global Phaser:true */
@@ -12451,7 +12739,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 	/**
 	* @namespace Phaser
@@ -12531,7 +12819,7 @@
 
 
 /***/ },
-/* 17 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12540,7 +12828,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -12932,7 +13220,7 @@
 
 
 /***/ },
-/* 18 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -12941,9 +13229,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -13482,7 +13770,7 @@
 
 
 /***/ },
-/* 19 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -13491,9 +13779,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -14409,7 +14697,7 @@
 
 
 /***/ },
-/* 20 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -14418,9 +14706,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -15336,7 +15624,7 @@
 
 
 /***/ },
-/* 21 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -15345,7 +15633,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -15778,7 +16066,7 @@
 
 
 /***/ },
-/* 22 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -15788,9 +16076,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -16095,7 +16383,7 @@
 
 
 /***/ },
-/* 23 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -16105,7 +16393,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -16350,7 +16638,7 @@
 
 
 /***/ },
-/* 24 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -16359,9 +16647,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -16873,7 +17161,7 @@
 
 
 /***/ },
-/* 25 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -16882,7 +17170,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -17077,7 +17365,7 @@
 
 
 /***/ },
-/* 26 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint newcap: false */
@@ -17088,7 +17376,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -17838,7 +18126,7 @@
 
 
 /***/ },
-/* 27 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -17848,7 +18136,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -18273,7 +18561,7 @@
 
 
 /***/ },
-/* 28 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -18283,7 +18571,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -18462,7 +18750,7 @@
 
 
 /***/ },
-/* 29 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -18471,9 +18759,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -18663,7 +18951,7 @@
 
 
 /***/ },
-/* 30 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -18672,7 +18960,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -18794,7 +19082,7 @@
 
 
 /***/ },
-/* 31 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint newcap: false */
@@ -18805,7 +19093,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -19090,7 +19378,7 @@
 
 
 /***/ },
-/* 32 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19099,9 +19387,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -19476,7 +19764,7 @@
 
 
 /***/ },
-/* 33 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19485,9 +19773,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -21556,7 +21844,7 @@
 
 
 /***/ },
-/* 34 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -21565,7 +21853,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -21904,7 +22192,7 @@
 
 
 /***/ },
-/* 35 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -21913,9 +22201,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -22242,7 +22530,7 @@
 
 
 /***/ },
-/* 36 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -22251,7 +22539,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -22366,7 +22654,7 @@
 
 
 /***/ },
-/* 37 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -22375,7 +22663,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -24795,7 +25083,7 @@
 
 
 /***/ },
-/* 38 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -24804,9 +25092,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -25882,7 +26170,7 @@
 
 
 /***/ },
-/* 39 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -25891,9 +26179,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -26935,7 +27223,7 @@
 
 
 /***/ },
-/* 40 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -26944,7 +27232,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -27308,7 +27596,7 @@
 
 
 /***/ },
-/* 41 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -27317,7 +27605,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -27995,7 +28283,7 @@
 
 
 /***/ },
-/* 42 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -28004,7 +28292,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -28682,7 +28970,7 @@
 
 
 /***/ },
-/* 43 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -28691,7 +28979,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -28886,7 +29174,7 @@
 
 
 /***/ },
-/* 44 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -28895,7 +29183,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -29762,7 +30050,7 @@
 
 
 /***/ },
-/* 45 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -29771,7 +30059,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -30170,7 +30458,7 @@
 
 
 /***/ },
-/* 46 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -30179,7 +30467,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -30858,7 +31146,7 @@
 
 
 /***/ },
-/* 47 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -30868,7 +31156,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -31421,7 +31709,7 @@
 
 
 /***/ },
-/* 48 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -31431,7 +31719,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -31642,7 +31930,7 @@
 
 
 /***/ },
-/* 49 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -31651,7 +31939,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -33158,7 +33446,7 @@
 
 
 /***/ },
-/* 50 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -33167,7 +33455,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -33353,7 +33641,7 @@
 
 
 /***/ },
-/* 51 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -33362,9 +33650,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -33850,7 +34138,7 @@
 
 
 /***/ },
-/* 52 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -33859,9 +34147,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -34273,7 +34561,7 @@
 
 
 /***/ },
-/* 53 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -34282,9 +34570,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -36094,7 +36382,7 @@
 
 
 /***/ },
-/* 54 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -36103,9 +36391,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -37466,7 +37754,7 @@
 
 
 /***/ },
-/* 55 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -37475,9 +37763,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -38517,7 +38805,7 @@
 
 
 /***/ },
-/* 56 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -38526,9 +38814,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -39337,7 +39625,7 @@
 
 
 /***/ },
-/* 57 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -39346,9 +39634,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -40177,7 +40465,7 @@
 
 
 /***/ },
-/* 58 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -40186,9 +40474,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -41230,7 +41518,7 @@
 
 
 /***/ },
-/* 59 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -41239,9 +41527,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -41724,7 +42012,7 @@
 
 
 /***/ },
-/* 60 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -41733,7 +42021,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -42315,7 +42603,7 @@
 
 
 /***/ },
-/* 61 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -42324,9 +42612,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -42694,7 +42982,7 @@
 
 
 /***/ },
-/* 62 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -42703,9 +42991,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -42809,7 +43097,7 @@
 
 
 /***/ },
-/* 63 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -42818,9 +43106,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -42859,7 +43147,7 @@
 
 
 /***/ },
-/* 64 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -42868,9 +43156,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -43487,7 +43775,7 @@
 
 
 /***/ },
-/* 65 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -43496,9 +43784,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -43681,7 +43969,7 @@
 
 
 /***/ },
-/* 66 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -43690,7 +43978,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -44840,10 +45128,10 @@
 
 	};
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(127)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(133)))
 
 /***/ },
-/* 67 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -44852,7 +45140,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -45282,7 +45570,7 @@
 
 
 /***/ },
-/* 68 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -45291,7 +45579,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -45578,7 +45866,7 @@
 
 
 /***/ },
-/* 69 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -45587,7 +45875,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -45755,7 +46043,7 @@
 
 
 /***/ },
-/* 70 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -45764,7 +46052,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -47043,7 +47331,7 @@
 
 
 /***/ },
-/* 71 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint noempty: false */
@@ -47054,7 +47342,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -47345,7 +47633,7 @@
 
 
 /***/ },
-/* 72 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -47355,7 +47643,7 @@
 	 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	 */
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	/**
 	* A QuadTree implementation. The original code was a conversion of the Java code posted to GameDevTuts.
@@ -47705,7 +47993,7 @@
 
 
 /***/ },
-/* 73 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -47714,7 +48002,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -47880,7 +48168,7 @@
 
 
 /***/ },
-/* 74 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -47889,7 +48177,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -48236,7 +48524,7 @@
 
 
 /***/ },
-/* 75 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -48245,7 +48533,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -49119,7 +49407,7 @@
 
 
 /***/ },
-/* 76 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -49128,7 +49416,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -49649,7 +49937,7 @@
 
 
 /***/ },
-/* 77 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint curly: false */
@@ -49660,7 +49948,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -50228,7 +50516,7 @@
 
 
 /***/ },
-/* 78 */
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -50237,7 +50525,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -50753,7 +51041,7 @@
 
 
 /***/ },
-/* 79 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -50762,7 +51050,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -51518,7 +51806,7 @@
 
 
 /***/ },
-/* 80 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -51527,7 +51815,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -51605,7 +51893,7 @@
 
 
 /***/ },
-/* 81 */
+/* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -51614,9 +51902,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -52209,7 +52497,7 @@
 
 
 /***/ },
-/* 82 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -52218,7 +52506,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -53012,7 +53300,7 @@
 
 
 /***/ },
-/* 83 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -53021,9 +53309,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 	/**
 	* A Frame is a single frame of an animation and is part of a FrameData collection.
@@ -53237,7 +53525,7 @@
 
 
 /***/ },
-/* 84 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -53246,7 +53534,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -53513,7 +53801,7 @@
 
 
 /***/ },
-/* 85 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -53522,9 +53810,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 	/**
 	* Responsible for parsing sprite sheet and JSON data into the internal FrameData format that Phaser uses for animations.
@@ -53832,7 +54120,7 @@
 
 
 /***/ },
-/* 86 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -53841,9 +54129,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -55497,7 +55785,7 @@
 
 
 /***/ },
-/* 87 */
+/* 95 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint wsh:true */
@@ -55507,7 +55795,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -57388,7 +57676,7 @@
 
 
 /***/ },
-/* 88 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -57397,9 +57685,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -57471,7 +57759,7 @@
 
 
 /***/ },
-/* 89 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -57481,7 +57769,7 @@
 	 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	 */
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	/**
 	 * Audio Sprites are a combination of audio files and a JSON configuration.
@@ -57609,7 +57897,7 @@
 
 
 /***/ },
-/* 90 */
+/* 98 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -57618,7 +57906,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -58638,7 +58926,7 @@
 
 
 /***/ },
-/* 91 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -58647,7 +58935,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -59290,7 +59578,7 @@
 
 
 /***/ },
-/* 92 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -59299,7 +59587,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -59534,7 +59822,7 @@
 
 
 /***/ },
-/* 93 */
+/* 101 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -59543,7 +59831,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -59731,7 +60019,7 @@
 
 
 /***/ },
-/* 94 */
+/* 102 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -59740,7 +60028,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -60049,7 +60337,7 @@
 
 
 /***/ },
-/* 95 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -60058,7 +60346,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -60874,7 +61162,7 @@
 
 
 /***/ },
-/* 96 */
+/* 104 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -60883,7 +61171,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -61855,7 +62143,7 @@
 
 
 /***/ },
-/* 97 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -61864,7 +62152,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -62209,7 +62497,7 @@
 
 
 /***/ },
-/* 98 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -62218,9 +62506,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -64041,7 +64329,7 @@
 
 
 /***/ },
-/* 99 */
+/* 107 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -64050,7 +64338,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -64880,7 +65168,7 @@
 
 
 /***/ },
-/* 100 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -64889,7 +65177,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -64969,7 +65257,7 @@
 
 
 /***/ },
-/* 101 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -64978,7 +65266,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -64989,7 +65277,7 @@
 	Phaser.Particles.Arcade = {};
 
 /***/ },
-/* 102 */
+/* 110 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -64998,9 +65286,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -65817,7 +66105,7 @@
 
 
 /***/ },
-/* 103 */
+/* 111 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -65826,7 +66114,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -66223,7 +66511,7 @@
 
 
 /***/ },
-/* 104 */
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -66232,7 +66520,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -68126,7 +68414,7 @@
 
 
 /***/ },
-/* 105 */
+/* 113 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -68135,9 +68423,9 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
-	var PIXI = __webpack_require__(128);
+	var PIXI = __webpack_require__(134);
 
 
 	/**
@@ -69300,7 +69588,7 @@
 
 
 /***/ },
-/* 106 */
+/* 114 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -69309,7 +69597,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -69846,7 +70134,7 @@
 
 
 /***/ },
-/* 107 */
+/* 115 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -69855,7 +70143,7 @@
 	* @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	/**
@@ -70116,7 +70404,7 @@
 
 
 /***/ },
-/* 108 */
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -70124,7 +70412,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.BinarySerpents = function (game) {
 
@@ -70221,14 +70509,14 @@
 
 
 /***/ },
-/* 109 */
+/* 117 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	* A horizontal blur filter by Mat Groves http://matgroves.com/ @Doormat23
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.BlurX = function (game) {
 
@@ -70283,14 +70571,14 @@
 
 
 /***/ },
-/* 110 */
+/* 118 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	* A vertical blur filter by Mat Groves http://matgroves.com/ @Doormat23
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.BlurY = function (game) {
 
@@ -70346,14 +70634,14 @@
 
 
 /***/ },
-/* 111 */
+/* 119 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	* A sample demonstrating how to create new Phaser Filters.
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.SampleFilter = function (game) {
 
@@ -70416,7 +70704,7 @@
 
 
 /***/ },
-/* 112 */
+/* 120 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -70424,7 +70712,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.CheckerWave = function (game) {
 
@@ -70596,7 +70884,7 @@
 
 
 /***/ },
-/* 113 */
+/* 121 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -70604,7 +70892,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.ColorBars = function (game) {
 
@@ -70691,7 +70979,7 @@
 
 
 /***/ },
-/* 114 */
+/* 122 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -70699,7 +70987,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.Fire = function (game) {
 
@@ -70812,7 +71100,7 @@
 
 
 /***/ },
-/* 115 */
+/* 123 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -70825,7 +71113,7 @@
 	* @contructor
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.Gray = function (game) {
 
@@ -70871,7 +71159,7 @@
 
 
 /***/ },
-/* 116 */
+/* 124 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -70879,7 +71167,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.HueRotate = function (game) {
 
@@ -70959,14 +71247,14 @@
 
 
 /***/ },
-/* 117 */
+/* 125 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	* A sample demonstrating how to create new Phaser Filters.
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.LazerBeam = function (game) {
 
@@ -71008,14 +71296,14 @@
 
 
 /***/ },
-/* 118 */
+/* 126 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	* Original shader from http://glsl.heroku.com/e#4122.10
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.LightBeam = function (game) {
 
@@ -71146,7 +71434,7 @@
 
 
 /***/ },
-/* 119 */
+/* 127 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -71154,7 +71442,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.Marble = function (game) {
 
@@ -71263,7 +71551,7 @@
 
 
 /***/ },
-/* 120 */
+/* 128 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -71277,7 +71565,7 @@
 	* @contructor
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 
 	Phaser.Filter.Pixelate = function(game) {
@@ -71338,7 +71626,7 @@
 
 
 /***/ },
-/* 121 */
+/* 129 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -71346,7 +71634,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.Plasma = function (game) {
 
@@ -71470,14 +71758,14 @@
 
 
 /***/ },
-/* 122 */
+/* 130 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	* A sample demonstrating how to create new Phaser Filters.
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.SampleFilter = function (game) {
 
@@ -71530,7 +71818,7 @@
 
 
 /***/ },
-/* 123 */
+/* 131 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -71538,7 +71826,7 @@
 	* Tweaked, uniforms added and converted to Phaser/PIXI by Richard Davey
 	*/
 
-	var Phaser = __webpack_require__(16);
+	var Phaser = __webpack_require__(24);
 
 	Phaser.Filter.Tunnel = function (game) {
 
@@ -71610,88 +71898,7 @@
 
 
 /***/ },
-/* 124 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _ = __webpack_require__( 9 );
-
-	///{{{ just usual inherit sugar
-	function _inherit ( P, proto, meta ){
-	    if ( !P )
-	        console.error('inherriting', proto, ' from undefined ', P);
-
-	    var N = function N(){
-	        P.apply( this, arguments );
-	        if ( meta && meta.init ){
-	            meta.init.apply( this, arguments );
-	        }
-	    };
-	    N.prototype = Object.create( P.prototype );
-	    // N.prototype.constructor = N;
-	    Object.defineProperty( N.prototype, 'constructor', {
-	        value : N,
-	        enumerable : false
-	    } );
-	    _.extend(N.prototype, proto );
-	    return N;
-	}
-	//}}}
-
-	module.exports =  {
-	    _inherit : _inherit
-	};
-
-
-/***/ },
-/* 125 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Entities = __webpack_require__(4);
-
-	function Basic() {}
-
-	Basic.prototype.typeDefinition = function () {
-	    return {
-	        type: this._type,
-	        namespace: this._namespace
-	    };
-	};
-
-	Basic.prototype.serialyze = function serialyze() {
-	    var result = {};
-	    result.type = this.typeDefinition();
-	    return result;
-	};
-
-	// STATIC METHODS
-	// this is wicked,
-	// consider refactoring to some fabric or similar
-	Basic.deserialyze = function deserialyze( serialyzed ) {
-	    var typeDefinition = serialyzed.type,
-	        ns,
-	        object;
-	    if ( !typeDefinition )
-	        throw 'cannot deserialyze empty type';
-
-	    try {
-	        ns = Entities[ typeDefinition.namespace ];
-	        object = new ( ns || Entities )[ typeDefinition.type ]();
-	    } catch ( exc ) {
-	        console.warn( 'failed to deserialyze item', Entities, typeDefinition );
-	        throw exc;
-	    }
-	    return object;
-	};
-
-	module.exports = Basic;
-
-
-/***/ },
-/* 126 */
+/* 132 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function(module) {
@@ -71707,7 +71914,7 @@
 
 
 /***/ },
-/* 127 */
+/* 133 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// shim for using process in browser
@@ -71799,7 +72006,7 @@
 
 
 /***/ },
-/* 128 */
+/* 134 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**

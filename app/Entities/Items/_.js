@@ -1,15 +1,17 @@
-define(['underscore', 'common', 'Entities/Items/Item', 'Entities/Items/Key', 'Entities/Items/Tellyport'], function( _, common, Item, Key, Tellyports ){
-    'use strict';
+'use strict';
 
-    var Items = {
-        Item : Item,
-        Key : Key
-    };
+var _ = require( 'lodash' ),
+    Item = require( './Item.js' ),
+    Key = require( './Key.js' ),
+    tellyports = require( './Tellyport.js' );
 
-    // add tellyports [0,1,2]
-    _.extend( Items, Tellyports );
+var Items = {
+    Item : Item,
+    Key : Key
+};
 
-    return Items;
+// add tellyports [0,1,2]
+_.extend( Items, tellyports );
 
+module.exports = Items;
 
-});

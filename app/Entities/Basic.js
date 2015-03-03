@@ -1,6 +1,6 @@
 'use strict';
 
-var Entities = require('./_.js');
+// Etities are needed only on deserialyze()
 
 function Basic() {}
 
@@ -28,6 +28,7 @@ Basic.deserialyze = function deserialyze( serialyzed ) {
         throw 'cannot deserialyze empty type';
 
     try {
+        var Entities = require('./_.js');
         ns = Entities[ typeDefinition.namespace ];
         object = new ( ns || Entities )[ typeDefinition.type ]();
     } catch ( exc ) {

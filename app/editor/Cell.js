@@ -1,6 +1,8 @@
 'use strict';
 
-var _ = require( 'lodash' );
+var _ = require( 'lodash' ),
+    Basic = require( '../Entities/Basic.js' ),
+    Entities = require( '../Entities/_.js' );
 
 function Cell( x, y, z, renderGroup ) {
     this.x = x;
@@ -46,11 +48,11 @@ _.extend( Cell.prototype, {
     // META
     isBlock: function isBlock() {
         // TODO: set it on item add/remove
-        return this.item && this.item instanceof Blocks.Block;
+        return this.item && this.item instanceof Entities.Blocks.Block;
     },
 
     isRamp : function isRamp (){
-        return this.item && this.item instanceof Blocks.Ramp;
+        return this.item && this.item instanceof Entities.Blocks.Ramp;
     }
 
 } );

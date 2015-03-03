@@ -27,11 +27,11 @@ var Tools = {
     Objects: Object.keys( Entities.Objects ).map( function ( key ) {
         return Entities.Objects[ key ];
     } ),
-    // Items: Object.keys( Items ).map( function ( key ) {
-    //     return Items[ key ];
-    // } ),
-    // Player: Player,
-    // Enemy: Enemy
+    Items: Object.keys( Entities.Items ).map( function ( key ) {
+        return Entities.Items[ key ];
+    } ),
+    Player: Entities.Player,
+    Enemy: Entities.Enemy
 };
 
 var helperImages = [
@@ -63,9 +63,9 @@ function preload() {
     // moveout to some global function
     Tools.Blocks.forEach( loadTool );
     Tools.Objects.forEach( loadTool );
-    // Tools.Items.forEach( loadTool );
-    // loadTool( Tools.Player );
-    // loadTool( Tools.Enemy );
+    Tools.Items.forEach( loadTool );
+    loadTool( Tools.Player );
+    loadTool( Tools.Enemy );
 
     function loadTool( tool ) {
         if ( tool.prototype.img ) {
@@ -92,8 +92,8 @@ function create() {
     var item;
     Tools.Blocks
         .concat( Tools.Objects )
-        // .concat( Tools.Items )
-        // .concat( [ Tools.Player, Tools.Enemy ] )
+        .concat( Tools.Items )
+        .concat( [ Tools.Player, Tools.Enemy ] )
         .filter( function ( Tool ) {
             return !!Tool.prototype.img;
         } )
@@ -132,7 +132,8 @@ function create() {
     e.camera.follow( cursor.sprite );
 
     // preload
-    levelProvider.load();
+    var exported = levelProvider.load();
+    world.imp( exported );
 
     // TODO: refactor to proper
     document.addEventListener( 'keydown', function ( e ) {

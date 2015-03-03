@@ -1,14 +1,14 @@
-define(['common', 'Entities/Basic'], function ( common, Basic ) {
-    'use strict';
+'use strict';
 
-    var Item = common._inherit( Basic, {
-        _type: 'Item',
-        _namespace: 'Items',
+var common = require('../../common.js'),
+    Basic = require('../Basic.js');
 
-        activate: function () {}
-    } );
+var Item = common._inherit( Basic, {
+    _type: 'Item',
+    _namespace: 'Items',
 
-    console.log('created Item', Item );
-    return Item;
-
+    activate: function () {}
 } );
+
+module.exports = Item;
+

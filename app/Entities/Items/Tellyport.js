@@ -1,20 +1,24 @@
-define(['exports', 'common', 'Entities/Items/Item'], function ( exports, common, Item ) {
-    'use strict';
+'use strict';
 
-    var Tellyport = common._inherit( Item, {} );
+var common = require('../../common.js'),
+    Item = require( './Item.js' );
 
-    var types = {
-        '0' : 'Gem Blue.png',
-        '1' : 'Gem Green.png',
-        '2' : 'Gem Orange.png'
-    };
+var Tellyport = common._inherit( Item, {} );
 
-    Object.keys( types ).forEach( function ( key ){
-        exports[ 'Tellyport' + key ] = common._inherit( Tellyport, {
-            img: types[ key ],
-            _type : 'Tellyport' + key
-        } );
-        console.log('Tellyport' + key);
+var types = {
+    '0' : 'Gem Blue.png',
+    '1' : 'Gem Green.png',
+    '2' : 'Gem Orange.png'
+};
+
+var tellyports = {};
+
+Object.keys( types ).forEach( function ( key ){
+    tellyports[ 'Tellyport' + key ] = common._inherit( Tellyport, {
+        img: types[ key ],
+        _type : 'Tellyport' + key
     } );
+} );
 
-});
+module.exports = tellyports;
+

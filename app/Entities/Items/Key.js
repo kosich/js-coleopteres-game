@@ -1,14 +1,11 @@
-define(['common', 'Entities/Items/Item'], function ( common, Item ) {
-    'use strict';
+'use strict';
 
-    console.log('item', Item);
+var common = require('../../common.js'),
+    Item = require( './Item.js' );
 
-    var Key = common._inherit( Item , {
-        img : 'Key.png',
-        _type : 'Key'
-    });
-
-    return Key;
-
+var Key = common._inherit( Item , {
+    img : 'Key.png',
+    _type : 'Key'
 });
 
+module.exports = Key;

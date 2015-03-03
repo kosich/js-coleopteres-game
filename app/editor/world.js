@@ -41,10 +41,14 @@ function init( renderGroup ) {
 }
 
 function imp( exported ) {
+    console.group( 'importing' );
+
+    console.log( 'going to import' , exported );
+
     // reset all current settings
     // & remove all current cells
     removeAll();
-    console.log( 'cleared cells ' );
+    console.log( 'cleared cells' );
 
     // import world properties
 
@@ -52,11 +56,16 @@ function imp( exported ) {
         cells = exported.cells.map( function ( def ) {
             try{
                 return Cell.deserialyze( def, group );
-            } catch( exc ){ }
+            } catch( exc ){
+                console.error( 'Failed to import', def , 'due to', exc);
+                throw exc;
+            }
         } ).filter( function( cell ){ return !!cell; } );
     }
 
     updateShadows();
+
+    console.groupEnd();
 }
 
 function exp() {
@@ -118,10 +127,10 @@ function removeAt( x, y, z ) {
 }
 
 function getCellAt( x, y, z ) {
-    return cells.find( function ( cell ) {
+    return cells.filter( function ( cell ) {
         // ? might use Point class with it's comparision
         return cell.x === x && cell.y === y && cell.z === z;
-    } );
+    } )[ 0 ];
 }
 
 
