@@ -2,11 +2,10 @@
 
 var Phaser = require( 'phaser' ),
 
+    levelProvider = require( '../levelProvider.js' ),
     Cursor = require( './Cursor.js' ),
     world = require( './world.js' ),
     Entities = require( '../Entities/_.js' );
-
-console.log( Entities );
 
 // Q: How world data would be stored?
 // A: Its a map {
@@ -19,7 +18,6 @@ console.log( Entities );
 // Editor has it's own world
 
 var currentItem = 0,
-    world = global.world,
     cursor;
 
 var Tools = {
@@ -60,24 +58,27 @@ var e = new Phaser.Game(
     } );
 
 function preload() {
+
+    debugger;
+
     // Preload all imgs for the tools
     // moveout to some global function
     Tools.Blocks.forEach( loadTool );
-    Tools.Objects.forEach( loadTool );
-    Tools.Items.forEach( loadTool );
-    loadTool( Tools.Player );
-    loadTool( Tools.Enemy );
+    // Tools.Objects.forEach( loadTool );
+    // Tools.Items.forEach( loadTool );
+    // loadTool( Tools.Player );
+    // loadTool( Tools.Enemy );
 
-    function loadTool( Tool ) {
-        if ( Tool.prototype.img )
-            e.load.image( Tool.prototype.img, 'assets/img/' + Tool.prototype.img );
+    function loadTool( tool ) {
+        if ( tool.prototype.img ) {
+            e.load.image( tool.prototype.img, 'assets/img/' + tool.prototype.img );
+        }
     }
 
     // set as reusable either
-    helperImages.forEach(
-        function ( img ) {
-            e.load.image( img, 'assets/img/' + img );
-        } );
+    helperImages.forEach( function ( img ) {
+        e.load.image( img, 'assets/img/' + img );
+    } );
 }
 
 function create() {
@@ -92,9 +93,9 @@ function create() {
 
     var item;
     Tools.Blocks
-        .concat( Tools.Objects )
-        .concat( Tools.Items )
-        .concat( [ Tools.Player, Tools.Enemy ] )
+        // .concat( Tools.Objects )
+        // .concat( Tools.Items )
+        // .concat( [ Tools.Player, Tools.Enemy ] )
         .filter( function ( Tool ) {
             return !!Tool.prototype.img;
         } )
