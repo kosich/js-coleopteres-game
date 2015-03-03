@@ -1,8 +1,11 @@
-define([ 'common', 'Entities/Objects/BasicObject' ], function( common, BasicObject ){
-    'use strict';
+'use strict';
 
-    return  common._inherit( BasicObject, {
-        img: 'Rock.png',
-        _type: 'Rock'
-    } )
+var common = require('../../common.js'),
+    BasicObject = require('./BasicObject.js');
+
+var Rock = common._inherit( BasicObject, {
+    img: 'Rock.png',
+    _type: 'Rock'
 } );
+
+module.exports = Rock;

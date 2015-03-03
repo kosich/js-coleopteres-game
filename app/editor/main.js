@@ -24,9 +24,9 @@ var Tools = {
     Blocks: Object.keys( Entities.Blocks ).map( function ( key ) {
         return Entities.Blocks[ key ];
     } ),
-    // Objects: Object.keys( Objects ).map( function ( key ) {
-    //     return Objects[ key ];
-    // } ),
+    Objects: Object.keys( Entities.Objects ).map( function ( key ) {
+        return Entities.Objects[ key ];
+    } ),
     // Items: Object.keys( Items ).map( function ( key ) {
     //     return Items[ key ];
     // } ),
@@ -59,12 +59,10 @@ var e = new Phaser.Game(
 
 function preload() {
 
-    debugger;
-
     // Preload all imgs for the tools
     // moveout to some global function
     Tools.Blocks.forEach( loadTool );
-    // Tools.Objects.forEach( loadTool );
+    Tools.Objects.forEach( loadTool );
     // Tools.Items.forEach( loadTool );
     // loadTool( Tools.Player );
     // loadTool( Tools.Enemy );
@@ -93,7 +91,7 @@ function create() {
 
     var item;
     Tools.Blocks
-        // .concat( Tools.Objects )
+        .concat( Tools.Objects )
         // .concat( Tools.Items )
         // .concat( [ Tools.Player, Tools.Enemy ] )
         .filter( function ( Tool ) {

@@ -1,13 +1,16 @@
-define([ 'underscore', 'Entities/Objects/BasicObject', './Rock', './Trees' ], function( _, BasicObject, Rock, Trees){
-    'use strict';
+'use strict';
 
-    var Objects = {
-        BasicObject : BasicObject,
-        Rock : Rock
-    };
+var _ = require( 'lodash' ),
+    BasicObject = require('./BasicObject.js'),
+    Rock = require('./Rock.js'),
+    Trees = require('./Trees.js');
 
-    _.extend( Objects, Trees );
+var Objects = {
+    BasicObject : BasicObject,
+    Rock : Rock
+};
 
-    return Objects;
+_.extend( Objects, Trees );
 
-} );
+module.exports = Objects;
+
