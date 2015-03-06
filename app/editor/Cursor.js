@@ -3,16 +3,18 @@
 var _ = require( 'lodash' );
 
 // CURSOR
-function Cursor( sprite ){
-    this.sprite = sprite;
-    sprite.anchor.set( 0, .24 );
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
-}
+class Cursor{
+    constructor ( sprite ){
+        // set offset for the image
+        sprite.anchor.set( 0, .24 );
 
-_.extend(Cursor.prototype, {
-    move : function move ( dx, dy, dz ){
+        this.sprite = sprite;
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+    } 
+
+    move ( dx, dy, dz ){
         this.x += dx;
         this.y += dy;
         this.z += dz;
@@ -22,6 +24,6 @@ _.extend(Cursor.prototype, {
         this.sprite._y = this.y;
         this.sprite._z = this.z - .1; // so it doesnt overlap block
     }
-});
+}
 
 module.exports = Cursor;

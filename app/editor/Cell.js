@@ -4,16 +4,17 @@ var _ = require( 'lodash' ),
     Basic = require( '../Entities/Basic.js' ),
     Entities = require( '../Entities/_.js' );
 
-function Cell( x, y, z, renderGroup ) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+class Cell {
 
-    this.renderGroup = renderGroup;
-}
+    constructor ( x, y, z, renderGroup ) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
 
-_.extend( Cell.prototype, {
-    add: function add( item ) {
+        this.renderGroup = renderGroup;
+    }
+
+    add ( item ) {
         if ( this.item )
             throw 'cell already has a block';
 
@@ -21,17 +22,19 @@ _.extend( Cell.prototype, {
 
         item.sprite = addSprite( this.renderGroup, item.img, this.x, this.y, this.z );
         return this;
-    },
-    remove: function remove() {
-        if ( this.item )
+    }
+
+    remove () {
+        if ( this.item ){
             this.item.sprite.destroy();
+        }
 
         return this;
-    },
+    }
 
     // serialization
-    serialyze : function serialyze(){
-        var serialyzed = {
+    serialyze (){
+        let serialyzed = {
             x: this.x,
             y: this.y,
             z: this.z
@@ -43,35 +46,32 @@ _.extend( Cell.prototype, {
         }
 
         return serialyzed;
-    },
+    }
 
     // META
-    isBlock: function isBlock() {
+    isBlock () {
         // TODO: set it on item add/remove
         return this.item && this.item instanceof Entities.Blocks.Block;
-    },
+    }
 
-    isRamp : function isRamp (){
+    isRamp(){
         return this.item && this.item instanceof Entities.Blocks.Ramp;
     }
 
-} );
-
-// static methods
-_.extend(Cell, {
-    deserialyze : function deserialyze( serialyzed, renderGroup ){
-        var cell = new Cell( serialyzed.x, serialyzed.y, serialyzed.z, renderGroup );
+    static deserialyze ( serialyzed, renderGroup ){
+        let cell = new Cell( serialyzed.x, serialyzed.y, serialyzed.z, renderGroup );
 
         if ( serialyzed.item ){
             cell.add( Basic.deserialyze( serialyzed.item ) );
         }
+
         return cell;
     }
-});
+}
 
 function addSprite( rg, img, x, y, z ) {
     // console.log( 'puting item to ', x, y, z );
-    var sprite = rg.create( x * CELL_X, y * CELL_Y - z * CELL_Z, img );
+    let sprite = rg.create( x * CELL_X, y * CELL_Y - z * CELL_Z, img );
     sprite._y = y;
     sprite._z = z;
     return sprite;

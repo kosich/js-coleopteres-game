@@ -17,12 +17,15 @@
   },
   "homepage": "https://github.com/udacity/frontend-nanodegree-arcade-game",
   "devDependencies": {
+    "babel-core": "^4.6.6",
+    "babel-loader": "^4.0.0",
     "gulp": "^3.8.11",
     "gulp-load-plugins": "^0.8.1",
     "gulp-rename": "^1.2.0",
     "gulp-sourcemaps": "^1.5.0",
     "gulp-watch": "^4.1.1",
-    "gulp-webpack": "^1.2.0"
+    "gulp-webpack": "^1.2.0",
+    "webpack": "^1.7.2"
   },
   "dependencies": {
     "lodash": "^3.3.1",

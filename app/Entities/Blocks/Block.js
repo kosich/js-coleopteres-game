@@ -3,7 +3,7 @@
 var common = require('../../common.js'),
     Basic = require('../Basic.js');
 
-module.exports = common._inherit( Basic, {
-    _type: 'Block',
+module.exports = class Block extends Basic {
+    _type: 'Block'
     _namespace: 'Blocks'
-} );
+};

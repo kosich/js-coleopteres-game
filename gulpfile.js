@@ -1,3 +1,5 @@
+'use strict';
+
 var gulp = require('gulp'),
     $ = require('gulp-load-plugins')();
 
@@ -12,17 +14,19 @@ var paths = {
 
 gulp.task('watch', function() {
     return $.watch( paths.watch.js, function(){
-        gulp.start( [ 'webpack' ] );
+        gulp.start( [ 'build' ] );
     });
 });
 
-gulp.task('webpack', function() {
+gulp.task('build', function() {
     return gulp.src( paths.src.editor )
         .pipe( $.sourcemaps.init() )
-        .pipe($.webpack({ /* webpack configuration */ }))
+        .pipe($.webpack(
+            require( './webpack.config.js' )
+        ))
         .pipe( $.rename('e.b.js') )
         .pipe( $.sourcemaps.write('.') )
         .pipe(gulp.dest('./'));
 });
 
-gulp.task( 'default', [ 'webpack', 'watch' ] );
+gulp.task( 'default', [ 'build', 'watch' ] );
