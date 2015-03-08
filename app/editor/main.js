@@ -264,3 +264,14 @@ function render() {
     // editor.debug.text("Click to toggle! Sorting enabled: " + sorted, 2, 36, "#ffffff");
     e.debug.text( cursor.z, 2, 14, "#a7aebe" );
 }
+
+
+// TODO: refactor whole file to
+// seperate editor and phaser
+window.loadLevel = function(){
+    world.imp(levelProvider.load(  ));
+};
+
+window.saveLevel  = function(){
+    levelProvider.save( world.exp() );
+};

@@ -32,7 +32,7 @@ class Cell {
         return this;
     }
 
-    // serialization
+    // serialization{{{
     serialyze (){
         let serialyzed = {
             x: this.x,
@@ -41,21 +41,11 @@ class Cell {
         };
 
         if ( this.item ){
-            // console.log( this.item );
+            console.log( 'serialyzing', this.item );
             serialyzed.item = this.item.serialyze();
         }
 
         return serialyzed;
-    }
-
-    // META
-    isBlock () {
-        // TODO: set it on item add/remove
-        return this.item && this.item instanceof Entities.Blocks.Block;
-    }
-
-    isRamp(){
-        return this.item && this.item instanceof Entities.Blocks.Ramp;
     }
 
     static deserialyze ( serialyzed, renderGroup ){
@@ -67,6 +57,18 @@ class Cell {
 
         return cell;
     }
+    //}}}
+
+    // META
+    isBlock () {
+        // TODO: set it on item add/remove
+        return this.item && this.item instanceof Entities.Blocks.Block;
+    }
+
+    isRamp(){
+        return this.item && this.item instanceof Entities.Blocks.Ramp;
+    }
+
 }
 
 function addSprite( rg, img, x, y, z ) {
