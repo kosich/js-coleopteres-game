@@ -20,11 +20,13 @@ gulp.task('watch', function() {
 
 gulp.task('build', function() {
     return gulp.src( paths.src.editor )
+        .pipe($.jshint())
+        .pipe($.jshint.reporter('default'))
         .pipe( $.sourcemaps.init() )
         .pipe($.webpack(
             require( './webpack.config.js' )
         ))
-        .pipe( $.rename('e.b.js') )
+        // .pipe( $.rename('e.b.js') )
         .pipe( $.sourcemaps.write('.') )
         .pipe(gulp.dest('./'));
 });

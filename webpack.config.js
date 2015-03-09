@@ -1,9 +1,12 @@
 'use strict';
 
 module.exports = {
-    entry: './app/editor/main.js',
+    entry: {
+      editor : './app/editor/main.js',
+      game : './app/game/main.js',
+    },
     output: {
-        filename: './bundle.js'
+        filename: './[name].entry.js'
     },
     module: {
         loaders: [

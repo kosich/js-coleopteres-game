@@ -1,28 +1,27 @@
-define([ 'phaser', 'game/gameworld', 'levelProvider', 'assets' ], function( Phaser, GameWorld, levelProvider, assets ){
-    'use strict';
+'use strict';
 
-    console.log( 'gameworld', GameWorld );
+var Phaser = require( 'phaser' ),
 
-    var world,
-        player,
-        renderGroup;
+    levelProvider = require( '../levelProvider.js' ),
+    GameWorld = require( './gameworld.js' ),
+    assets = require( '../assets.js' );
 
-    var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'gamepane', {
-        preload : preload,
-        create: create,
-        update: update,
-        render: render
-    });
 
-    function preload() {
+var world,
+    player,
+    renderGroup, 
+    game;
+
+var Game = {
+    preload() {
         // preload images
         var self = this;
         assets.img.forEach( function ( img ){
             self.load.image( img, 'assets/img/' + img );
         } );
-    }
+    },
 
-    function create() {
+    create() {
         // create a new world,
         // load a level to it
         // add controlling
@@ -60,19 +59,14 @@ define([ 'phaser', 'game/gameworld', 'levelProvider', 'assets' ], function( Phas
             if ( e.keyCode in allowedKeys )
                 player.handleInput(allowedKeys[e.keyCode]);
         });
-    }
+    },
 
-
-    function update( game ) {
+    update( game ) {
         // update world
         world.update( game.time.elapsed );
         world.updateRenderSort();
     }
 
-
-    function render() { }
-    function reset (){ }
-
-    return game;
-
-});
+};
+    
+game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'gamepane', Game );
