@@ -1,5 +1,7 @@
 'use strict';
 
+// TODO: this repeats much editor/world
+
 var _ = require( 'lodash' );
 
 // public properties:
@@ -73,10 +75,10 @@ function removeAt( x, y, z ) {
 }
 
 function getCellAt( x, y, z ) {
-    return this.cells.find( function ( cell ) {
+    return this.cells.filter( function ( cell ) {
         // ? might use Point class with it's comparision
         return cell.x === x && cell.y === y && cell.z === z;
-    } );
+    } )[ 0 ]; // TODO: use `cells.find` as soon as it's available
 }
 
 function updateRender (){

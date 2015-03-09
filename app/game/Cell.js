@@ -1,5 +1,7 @@
 'use strict';
 
+// TODO: this is pretty much like the editor/Cell one
+
 var _ = require( 'lodash' ),
     Entities = require( '../Entities/_.js' ),
     Basic = require( '../Entities/Basic.js' );

@@ -130,7 +130,7 @@ function getCellAt( x, y, z ) {
     return cells.filter( function ( cell ) {
         // ? might use Point class with it's comparision
         return cell.x === x && cell.y === y && cell.z === z;
-    } )[ 0 ];
+    } )[ 0 ]; // TODO: use `cells.find` as soon as it's available
 }
 
 
