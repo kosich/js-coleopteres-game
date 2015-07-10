@@ -1,6 +1,6 @@
 'use strict';
 
-var Phaser = require( 'phaser' ),
+let Phaser = require( 'phaser' ),
 
     levelProvider = require( '../levelProvider.js' ),
     Cursor = require( './Cursor.js' ),
@@ -101,7 +101,7 @@ function create() {
             item = new Block();
             item.sprite = toolBoxGroup.create( 0, i * CELL_Y * 1.5, item.img );
             item.sprite.alpha = 0.5;
-            item.sprite.anchor.set( .5, .5 );
+            item.sprite.anchor.set( 0.5, 0.5 );
             items.push( item );
         } );
 
@@ -120,7 +120,7 @@ function create() {
     cursor = new Cursor( cellGroup.create( 0, 0, 'Selector.png' ) );
     e.add.tween( cursor.sprite )
         .to( {
-            alpha: .5
+            alpha: 0.5
         }, 1000, Phaser.Easing.Quadratic.InOut )
         .to( {
             alpha: 1
@@ -178,7 +178,7 @@ function setCurrent( id ) {
     if ( item && item.tween ) {
         item.tween.pause();
         e.add.tween( item.sprite ).to( {
-            alpha: .25
+            alpha: 0.25
         }, 100 ).start();
 
         e.add.tween( item.sprite.scale ).to( {
