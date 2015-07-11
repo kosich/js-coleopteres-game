@@ -1,0 +1,4 @@
+- editor >> game
+- walkthrough all level
+- turns
+- items inventory
