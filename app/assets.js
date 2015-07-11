@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     img: [
         'Brown Block.png',
         'Dirt Block.png',

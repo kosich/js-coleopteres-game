@@ -1,11 +1,12 @@
 'use strict';
 
-var _ = require( 'lodash' );
+import _ from 'lodash'
 
 ///{{{ just usual inherit sugar
 function _inherit ( P, proto, meta ){
-    if ( !P )
+    if ( !P ){
         console.error('inherriting', proto, ' from undefined ', P);
+    }
 
     var N = function N(){
         P.apply( this, arguments );
@@ -24,6 +25,6 @@ function _inherit ( P, proto, meta ){
 }
 //}}}
 
-module.exports =  {
-    _inherit : _inherit
+export default {
+    _inherit
 };

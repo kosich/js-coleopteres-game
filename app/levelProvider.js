@@ -2,7 +2,7 @@
 
 var LOCAL_STORAGE_LEVEL_KEY = 'editingLevel';
 
-module.exports = {
+export default {
 
     save( data ) {
         localStorage.setItem( LOCAL_STORAGE_LEVEL_KEY, JSON.stringify( data ) );
@@ -26,4 +26,3 @@ module.exports = {
     }
 
 };
-

@@ -1,11 +1,8 @@
-'use strict';
-
-let Phaser = require( 'phaser' ),
-
-    levelProvider = require( '../levelProvider.js' ),
-    Cursor = require( './Cursor.js' ),
-    world = require( './world.js' ),
-    Entities = require( '../Entities/_.js' );
+import Phaser from 'phaser';
+import levelProvider from '../levelProvider.js';
+import Cursor from './Cursor.js';
+import world from './world.js';
+import Entities from '../Entities/_.js';
 
 // Q: How world data would be stored?
 // A: Its a map {
@@ -17,10 +14,10 @@ let Phaser = require( 'phaser' ),
 //
 // Editor has it's own world
 
-var currentItem = 0,
+let currentItem = 0,
     cursor;
 
-var Tools = {
+const Tools = {
     Blocks: Object.keys( Entities.Blocks ).map( function ( key ) {
         return Entities.Blocks[ key ];
     } ),
@@ -34,7 +31,7 @@ var Tools = {
     Enemy: Entities.Enemy
 };
 
-var helperImages = [
+let helperImages = [
     'Selector.png',
     'Shadow East.png',
     'Shadow West.png',
@@ -46,10 +43,10 @@ var helperImages = [
     'Shadow South West.png'
 ];
 
-var items = [],
+let items = [],
     toolBoxGroup, cellGroup;
 
-var e = new Phaser.Game(
+let e = new Phaser.Game(
     1100, 648, Phaser.AUTO, 'gamepane', {
         preload: preload,
         create: create,
@@ -89,7 +86,7 @@ function create() {
     cellGroup = e.add.group();
     toolBoxGroup = e.add.group();
 
-    var item;
+    let item;
     Tools.Blocks
         .concat( Tools.Objects )
         .concat( Tools.Items )
@@ -132,12 +129,12 @@ function create() {
     e.camera.follow( cursor.sprite );
 
     // preload
-    var exported = levelProvider.load();
+    let exported = levelProvider.load();
     world.imp( exported );
 
     // TODO: refactor to proper
     document.addEventListener( 'keydown', function ( e ) {
-        var allowedKeys = {
+        let allowedKeys = {
             76: 'move:+x',
             72: 'move:-x',
 
@@ -164,7 +161,7 @@ function create() {
 }
 
 // TODO: move to toolbox.js
-var scaleFactor = 1.1;
+let scaleFactor = 1.1;
 
 function setCurrent( id ) {
     if ( id < 0 )
@@ -172,7 +169,7 @@ function setCurrent( id ) {
     else if ( id >= items.length )
         id = 0;
 
-    var item = items[ currentItem ],
+    let item = items[ currentItem ],
         titem = items[ id ];
 
     if ( item && item.tween ) {
@@ -187,7 +184,7 @@ function setCurrent( id ) {
         }, 100 ).start();
     }
 
-    var tweenY = titem.sprite.y;
+    let tweenY = titem.sprite.y;
 
     if ( titem && !titem.tween ) {
         titem.tween = e.add.tween( titem.sprite );
@@ -217,12 +214,12 @@ function setCurrent( id ) {
     currentItem = id;
 }
 
-var moveRegex = /move:([+-])([xyz])/;
+const moveRegex = /move:([+-])([xyz])/;
 
 function handleInput( dir ) {
     if ( dir.indexOf( 'move:' ) === 0 ) {
         // movement key
-        var parsed = moveRegex.exec( dir ),
+        let parsed = moveRegex.exec( dir ),
             moveModificator = [ 0, 0, 0 ];
 
         // ok, this needs explanation:
