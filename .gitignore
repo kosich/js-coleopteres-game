@@ -1,6 +1,5 @@
 *.sw*
 
-/bower_components/*
-!/bower_components/underscore/underscore.js
-!/bower_components/phaser-official/build/phaser.js
+/editor.entry.js
+/game.entry.js
 /node_modules/*

@@ -3,7 +3,7 @@ import levelProvider from '../levelProvider.js';
 import Cursor from './Cursor.js';
 import world from './world.js';
 import Entities from '../Entities/_.js';
-import { CELL_X, CELL_Z, CELL_Y } from '../const.js';
+import { CELL_X, CELL_Y } from '../const.js';
 
 // Q: How world data would be stored?
 // A: Its a map {
