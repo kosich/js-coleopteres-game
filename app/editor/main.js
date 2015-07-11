@@ -3,6 +3,7 @@ import levelProvider from '../levelProvider.js';
 import Cursor from './Cursor.js';
 import world from './world.js';
 import Entities from '../Entities/_.js';
+import { CELL_X, CELL_Z, CELL_Y } from '../const.js';
 
 // Q: How world data would be stored?
 // A: Its a map {
@@ -18,15 +19,9 @@ let currentItem = 0,
     cursor;
 
 const Tools = {
-    Blocks: Object.keys( Entities.Blocks ).map( function ( key ) {
-        return Entities.Blocks[ key ];
-    } ),
-    Objects: Object.keys( Entities.Objects ).map( function ( key ) {
-        return Entities.Objects[ key ];
-    } ),
-    Items: Object.keys( Entities.Items ).map( function ( key ) {
-        return Entities.Items[ key ];
-    } ),
+    Blocks: Object.keys( Entities.Blocks ).map( key => Entities.Blocks[ key ]),
+    Objects: Object.keys( Entities.Objects ).map( key => Entities.Objects[ key ] ),
+    Items: Object.keys( Entities.Items ).map( key => Entities.Items[ key ] ),
     Player: Entities.Player,
     Enemy: Entities.Enemy
 };

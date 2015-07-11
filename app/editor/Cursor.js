@@ -1,6 +1,5 @@
-'use strict';
-
-var _ = require( 'lodash' );
+import _ from 'lodash';
+import { CELL_X, CELL_Z, CELL_Y } from '../const.js';
 
 // CURSOR
 class Cursor{
@@ -26,4 +25,4 @@ class Cursor{
     }
 }
 
-module.exports = Cursor;
+export default Cursor;

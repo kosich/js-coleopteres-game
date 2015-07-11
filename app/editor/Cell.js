@@ -1,8 +1,9 @@
 'use strict';
 
-var _ = require( 'lodash' ),
-    Basic = require( '../Entities/Basic.js' ),
-    Entities = require( '../Entities/_.js' );
+import _ from 'lodash';
+import Basic from '../Entities/Basic.js';
+import Entities from '../Entities/_.js';
+import { CELL_X, CELL_Z, CELL_Y } from '../const.js';
 
 class Cell {
 
@@ -79,4 +80,4 @@ function addSprite( rg, img, x, y, z ) {
     return sprite;
 }
 
-module.exports = Cell;
+export default Cell;

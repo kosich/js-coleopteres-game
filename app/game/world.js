@@ -2,7 +2,8 @@
 
 // TODO: this repeats much editor/world
 
-var _ = require( 'lodash' );
+import _ from 'lodash';
+import { CELL_X, CELL_Z, CELL_Y } from '../const.js';
 
 // public properties:
 //

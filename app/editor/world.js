@@ -1,6 +1,7 @@
 'use strict';
 
-var Cell = require( './Cell.js' );
+import Cell from './Cell.js';
+import { CELL_X, CELL_Z, CELL_Y } from '../const.js';
 
 // public properties:
 //
