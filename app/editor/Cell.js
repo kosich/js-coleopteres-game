@@ -70,6 +70,10 @@ class Cell {
         return this.item && this.item instanceof Entities.Blocks.Ramp;
     }
 
+    isPlayer (){
+        return this.item && this.item instanceof Entities.Player;
+    }
+
 }
 
 function addSprite( rg, img, x, y, z ) {

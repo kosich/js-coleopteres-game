@@ -1,5 +1,4 @@
 *.sw*
 
-/editor.entry.js
-/game.entry.js
+/*entry.js
 /node_modules/*

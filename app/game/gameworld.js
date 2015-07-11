@@ -1,11 +1,12 @@
 'use strict';
 
-var _ = require( 'lodash' ),
-    Phaser = require( 'phaser' ),
-    World = require( './world.js' ),
-    Entities = require( '../Entities/_.js' ),
-    Cell = require( './Cell.js' ),
-    common = require( '../common.js' );
+import _ from 'lodash';
+import Phaser from 'phaser';
+import World from './world.js';
+import Entities from '../Entities/_.js';
+import Cell from './Cell.js';
+import common from '../common.js';
+import { CELL_Z, CELL_X, CELL_Y } from '../const.js';
 
 var GameWorld = common._inherit( World, {
     field: undefined, // [[[]]] z y x arrays
@@ -197,4 +198,4 @@ function imp( exported ) {
     this.updateRender();
 }
 
-module.exports = GameWorld;
+export default GameWorld;

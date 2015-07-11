@@ -73,9 +73,8 @@ function exp() {
     // export all world properies
     // gravity or whatever
     var exported = {};
-    exported.cells = cells.map( function ( cell ) {
-        return cell.serialyze();
-    } );
+    exported.cells = cells
+        .map(cell => cell.serialyze());
 
     return exported;
 }

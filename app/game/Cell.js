@@ -6,6 +6,8 @@ var _ = require( 'lodash' ),
     Entities = require( '../Entities/_.js' ),
     Basic = require( '../Entities/Basic.js' );
 
+import { CELL_X, CELL_Z, CELL_Y } from '../const.js';
+
 function Cell( x, y, z, renderGroup ) {
     this.x = x;
     this.y = y;
@@ -79,4 +81,4 @@ function addSprite( rg, img, x, y, z ) {
     return sprite;
 }
 
-module.exports = Cell;
+export default Cell;
