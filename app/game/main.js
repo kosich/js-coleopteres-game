@@ -1,10 +1,9 @@
 'use strict';
 
-var Phaser = require( 'phaser' ),
-
-    levelProvider = require( '../levelProvider.js' ),
-    GameWorld = require( './gameworld.js' ),
-    assets = require( '../assets.js' );
+import Phaser from 'phaser';
+import levelProvider from '../levelProvider.js';
+import GameWorld from './gameworld.js';
+import assets from '../assets.js';
 
 
 var world,

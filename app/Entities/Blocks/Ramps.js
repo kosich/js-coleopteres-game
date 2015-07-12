@@ -10,12 +10,12 @@ module.exports = {
     RampEast : common._inherit( Ramp, {
         _type : 'RampEast',
         img : 'Ramp East.png',
-        rampDirection : [ 0, 1 ]
+        rampDirection : [ 1, 0 ]
     } ),
     RampNorth : common._inherit( Ramp, {
         _type : 'RampNorth',
         img : 'Ramp North.png',
-        rampDirection : [ 0, 1 ]
+        rampDirection : [ 0, -1 ]
     } ),
     RampSouth : common._inherit( Ramp, {
         _type : 'RampSouth',
@@ -25,7 +25,7 @@ module.exports = {
     RampWest : common._inherit( Ramp, {
         _type : 'RampWest',
         img : 'Ramp West.png',
-        rampDirection : [ 0, 1 ]
+        rampDirection : [ -1, 0 ]
     } ),
 };
 

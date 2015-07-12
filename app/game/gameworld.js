@@ -23,20 +23,37 @@ var GameWorld = common._inherit( World, {
         // this.game.camera.setSize( size.width, size.height );
         // this.game.camera.setBoundsToWorld();
     },
+
     update( delta ) {
         // ais.foreach.move;
         // world.enemies.forEach( updateMovable );
         updateMovable.call( this, this.player );
     },
+
     move( item, pos ) {
         // moving item to 
-        console.log( item.x, item.y, item.z );
-        var targetCell = this.field[ pos.z ][ pos.y ][ pos.x ],
-            currentCell = this.field[ item.z ][ item.y ][ item.x ];
+        // console.log( item.x, item.y, item.z );
+        let currentCell = this.field[ item.z ][ item.y ][ item.x ];
+        let underneathCell = this.field[ item.z - 1 ][ item.y ][ item.x ];
 
-        if ( currentCell.isRamp() ){
+        let targetCell;
+
+        if ( underneathCell.isRamp() ){
             // if slope goes down, z--
             // else z++
+            item.movementDirection.x;
+            item.movementDirection.y;
+
+            let z = pos.z,
+                y = pos.y + underneathCell.item.rampDirection[1],
+                x = pos.x + underneathCell.item.rampDirection[0];
+
+            console.log('current ramp', item.x, item.y, item.z);
+            console.log('current ramp', x, y, z);
+
+            targetCell = this.field[ z ][ y ][ x ];
+        } else {
+            targetCell = this.field[ pos.z ][ pos.y ][ pos.x ];
         }
 
         if ( !targetCell || ( targetCell.item && !targetCell.isRamp() ) ) {
